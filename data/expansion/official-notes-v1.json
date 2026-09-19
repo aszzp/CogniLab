@@ -1,0 +1,362 @@
+[
+  {
+    "number": 1,
+    "topic_keys": [
+      "G01"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "本题重点是数字人的呈现和交互。并不意味着延迟、存储和系统稳定性完全不影响实际服务。"
+  },
+  {
+    "number": 2,
+    "topic_keys": [
+      "G03"
+    ],
+    "review_status": "context_bound",
+    "explanation": "关键在于定义角色、任务与边界，而非提示词必须超过统一字符数。千字符不是可泛化的技术门槛。"
+  },
+  {
+    "number": 3,
+    "topic_keys": [
+      "G04"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "知识库提供业务依据，仍需时效、权限、检索质量、证据一致性及人工兜底。不能承诺接库即零幻觉。"
+  },
+  {
+    "number": 4,
+    "topic_keys": [
+      "G10"
+    ],
+    "review_status": "context_bound",
+    "explanation": "这是一道涉及具体产品发布能力的历史语境题。尚未核对PDF及对应发布资料，不据此断言所有平台的现行能力。"
+  },
+  {
+    "number": 5,
+    "topic_keys": [
+      "G05"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "重点是上下文理解和需求澄清。预判是待验证的理解，不是替用户擅自决定或编造偏好。"
+  },
+  {
+    "number": 6,
+    "topic_keys": [
+      "G13"
+    ],
+    "review_status": "context_bound",
+    "explanation": "样题把减少成本、周期和人力与现场拍摄方式进行比较。实际收益仍依任务而定，不能保证所有项目都更低成本。"
+  },
+  {
+    "number": 7,
+    "topic_keys": [
+      "G04"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "有效业务知识是重要依据，但知识库之外还要控制错误检索、来源过期和生成无依据扩写。"
+  },
+  {
+    "number": 8,
+    "topic_keys": [
+      "G07"
+    ],
+    "review_status": "context_bound",
+    "explanation": "保留本题选项语境。工程实现还可能使用音频、音素或视素驱动；不能把该题答案解释为唯一实现路线。"
+  },
+  {
+    "number": 9,
+    "topic_keys": [
+      "A08"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "数据安全与隐私保护应落实到必要字段、授权用途、访问、脱敏和保留规则，而不只记口号。"
+  },
+  {
+    "number": 10,
+    "topic_keys": [
+      "G13"
+    ],
+    "review_status": "context_bound",
+    "explanation": "常见数字人制作可以免现场拍摄，并不禁止混用已获授权的实拍素材。"
+  },
+  {
+    "number": 11,
+    "topic_keys": [
+      "G09"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "情感模型语境中D为Dominance（支配度）。音频工程中的VAD也可表示语音活动检测，需结合上下文。"
+  },
+  {
+    "number": 12,
+    "topic_keys": [
+      "G06"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "数字人训练需要技术、业务、表达和交互协作。多元化并不表示不需要技术能力或质量审核。"
+  },
+  {
+    "number": 13,
+    "topic_keys": [
+      "G11"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "多模态需要在语义、情绪和时序上协调，不是简单叠加更多素材。"
+  },
+  {
+    "number": 14,
+    "topic_keys": [
+      "G14"
+    ],
+    "review_status": "context_bound",
+    "explanation": "该题强调地方语料和文化适配。通用翻译可作辅助，不应被描述为与本地化绝对无关。"
+  },
+  {
+    "number": 15,
+    "topic_keys": [
+      "B07"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "分词与句法处理是该文本语义任务的预处理举例，实际流水线需按任务需求决定。"
+  },
+  {
+    "number": 16,
+    "topic_keys": [
+      "G12"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "体感交互可利用手势和动作输入，但须处理遮挡、误识别及替代输入。"
+  },
+  {
+    "number": 17,
+    "topic_keys": [
+      "C04"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "梳理业务流程帮助定义数据采集、处理和审核，需要明确步骤、责任、数据与决策。"
+  },
+  {
+    "number": 18,
+    "topic_keys": [
+      "C04"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "处理单条数据也应结合所处业务流程及字段语义，不能把业务含义与数据形式割裂。"
+  },
+  {
+    "number": 19,
+    "topic_keys": [
+      "B07"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "与Q15考点相近，属于原有重复训练语义，不计为新增独立考点。文本预处理应保留必要上下文。"
+  },
+  {
+    "number": 20,
+    "topic_keys": [
+      "C07"
+    ],
+    "review_status": "context_bound",
+    "explanation": "文本数值化是特征工程的一个例子，不是完整定义。特征工程也包括其他类型数据及变换。"
+  },
+  {
+    "number": 21,
+    "topic_keys": [
+      "B08"
+    ],
+    "review_status": "context_bound",
+    "explanation": "栅格图像按像素表达；不要扩写为所有视觉数据都只有单张点阵图一种表示。"
+  },
+  {
+    "number": 22,
+    "topic_keys": [
+      "B08"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "图像描述可通过文本表达图像语义，和像素编码不是同一层面的任务。"
+  },
+  {
+    "number": 23,
+    "topic_keys": [
+      "C08"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "协同过滤基于用户或物品行为相似性，需关注冷启动、稀疏性与热门偏差。"
+  },
+  {
+    "number": 24,
+    "topic_keys": [
+      "C09"
+    ],
+    "review_status": "context_bound",
+    "explanation": "优化目标必须结合约束。可最大化业务收益，也可最小化成本或耗时，不能一概只最大化某个指标。"
+  },
+  {
+    "number": 25,
+    "topic_keys": [
+      "C04"
+    ],
+    "review_status": "context_bound",
+    "explanation": "在本题选项下保留仓库答案；一般业务流程设计还要说明活动、判断、数据和责任，不只有功能列表。"
+  },
+  {
+    "number": 26,
+    "topic_keys": [
+      "C11"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "效率是重要目标，但实际流程优化还应兼顾质量、风险和资源约束。"
+  },
+  {
+    "number": 27,
+    "topic_keys": [
+      "C11"
+    ],
+    "review_status": "needs_source_review",
+    "explanation": "【待核验冲突】仓库题库当前答案对应“经营环境稳定性”，旧考纲写“业务流程图”。尚未逐页核对样题PDF或该术语原始定义，不擅自改答案，也不新增以该定义为前提的客观题。"
+  },
+  {
+    "number": 28,
+    "topic_keys": [
+      "C10"
+    ],
+    "review_status": "needs_source_review",
+    "explanation": "【待核验冲突】仓库当前答案对应“患者的视频”，旧考纲却写“患者的电子病历”。本轮保留现存题号与答案并标记疑点；不把任一选项推广为医疗实务定义。"
+  },
+  {
+    "number": 29,
+    "topic_keys": [
+      "C11"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "流程分析关注步骤、活动与决策关系；据此进一步定位瓶颈和责任接口。"
+  },
+  {
+    "number": 30,
+    "topic_keys": [
+      "C11"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "复杂流程优化可以以效率为目标，但也需要事先定义的质量及风险边界。"
+  },
+  {
+    "number": 31,
+    "topic_keys": [
+      "B10"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "清洗提高任务数据的可用性与质量，需按成因处理缺失、重复及异常，不是全部机械删除。"
+  },
+  {
+    "number": 32,
+    "topic_keys": [
+      "C10"
+    ],
+    "review_status": "needs_source_review",
+    "explanation": "【待核验冲突与重复】本题与仓库Q28题干和选项相同，旧模块却归入数据处理。保留原题号与答案供核验，改为关联应用场景；不把重复样题算成新增知识点。"
+  },
+  {
+    "number": 33,
+    "topic_keys": [
+      "B10"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "文本清洗服务于可用性，不能为了格式统一而删除否定、单位或关键上下文。"
+  },
+  {
+    "number": 34,
+    "topic_keys": [
+      "B12"
+    ],
+    "review_status": "context_bound",
+    "explanation": "不同项目对实体、属性、词性及类别标签的体系可能不同。沿用本题答案语境，实际标注须明确标签定义与边界。"
+  },
+  {
+    "number": 35,
+    "topic_keys": [
+      "B13"
+    ],
+    "review_status": "context_bound",
+    "explanation": "词典是辅助工具，领域新词、分词粒度和上下文均需考虑。不能无条件要求所有词都已收录于固定词典。"
+  },
+  {
+    "number": 36,
+    "topic_keys": [
+      "B12"
+    ],
+    "review_status": "context_bound",
+    "explanation": "在本题订单字段抽取语境中归为实体标注；实际项目还可能同时定义属性或关系标签。"
+  },
+  {
+    "number": 37,
+    "topic_keys": [
+      "B08"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "业务需求决定视觉数据质量规范，需写清可解码、尺寸、清晰度和标注要求。"
+  },
+  {
+    "number": 38,
+    "topic_keys": [
+      "B08"
+    ],
+    "review_status": "context_bound",
+    "explanation": "确实无法可靠解码或使用的样本需隔离、修复或排除；“损坏”应由检测确定，不能把所有低质量样本等同于完全不可训练。"
+  },
+  {
+    "number": 39,
+    "topic_keys": [
+      "E07"
+    ],
+    "review_status": "context_bound",
+    "explanation": "数据准备是AI开发的重要环节，但并非非AI软件绝对不存在的数据工作。"
+  },
+  {
+    "number": 40,
+    "topic_keys": [
+      "E08"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "硬件产品需要工业、结构和硬件设计协同，并同时考虑软件交互及持续运行。"
+  },
+  {
+    "number": 41,
+    "topic_keys": [
+      "D11"
+    ],
+    "review_status": "context_bound",
+    "explanation": "【条件修正】Keras evaluate返回损失及已配置的指标。没有配置accuracy就不能断言默认包含准确率；可用return_dict=True读取具名结果。保留原样题答案仅用于原题语境。"
+  },
+  {
+    "number": 42,
+    "topic_keys": [
+      "D11"
+    ],
+    "review_status": "repository_sample",
+    "explanation": "compile中loss配置损失，optimizer配置优化器，metrics配置评估指标，三者不可混用。"
+  },
+  {
+    "number": 43,
+    "topic_keys": [
+      "D10"
+    ],
+    "review_status": "context_bound",
+    "explanation": "运行时间是性能指标，不是分类预测质量指标，但仍属于完整算法测试的有效维度。"
+  },
+  {
+    "number": 44,
+    "topic_keys": [
+      "E09"
+    ],
+    "review_status": "context_bound",
+    "explanation": "【版本边界】本题区分终端应用与训练开发平台；产品能力可能变化，且样题中的品牌名称不应被当作标准术语。未核验当前全部产品能力，不据此编写永久排他结论。"
+  },
+  {
+    "number": 45,
+    "topic_keys": [
+      "E05"
+    ],
+    "review_status": "context_bound",
+    "explanation": "【概念边界】情感识别是任务，视觉是输入模态，两者可以相交。例如表情可用于情感相关推断。保留原题答案，但不把它当作普遍互斥分类。"
+  }
+]

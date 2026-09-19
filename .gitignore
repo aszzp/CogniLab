@@ -42,3 +42,12 @@ next-env.d.ts
 data/*.db
 data/*.db-journal
 data/*.db-wal
+
+# Local database backups may contain settings, tokens and learning history.
+/data/backups/
+data/*.db-shm
+/data/generated/
+
+# Python test/authoring caches
+__pycache__/
+*.py[cod]
