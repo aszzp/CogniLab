@@ -1,0 +1,17 @@
+{
+  "name": "CogniLab 数字人训练师备赛",
+  "short_name": "CogniLab",
+  "description": "AI 原生的人工智能数字人训练师赛项备赛训练系统",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070c",
+  "theme_color": "#07070c",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

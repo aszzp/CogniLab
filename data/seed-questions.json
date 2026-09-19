@@ -1,0 +1,1325 @@
+[
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "人工智能数字人训练师主要聚焦于驱动数字人在哪个层面的智能化表现？",
+  "options": [
+   "数据存储与检索效率",
+   "外观、音色、行为设计与多模态交互",
+   "底层芯片算力优化",
+   "网络传输协议设计"
+  ],
+  "answer": "B",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "在数字人训练中，构建“人格特征与交互逻辑”的训练体系，首要工作是？",
+  "options": [
+   "编写海量产品说明书",
+   "设计超千字符的提示词（Prompt）框架并定义人设",
+   "搭建实体机器人硬件结构",
+   "购买高性能显卡"
+  ],
+  "answer": "B",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "数字人从“会展示”进化为“能服务”，其“大脑”进化的核心驱动力是？",
+  "options": [
+   "提高4K画面渲染帧率",
+   "降低背景音乐版权成本",
+   "构建垂直领域知识库并降低回答幻觉率",
+   "增加更多虚拟服装款式"
+  ],
+  "answer": "C",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "科大讯飞发布的“超拟人数字人实时生成技术”标志着数字人制作门槛大幅降低，目前仅需怎样即可实时生成可交互的数字人？",
+  "options": [
+   "2小时真人视频采集",
+   "一个月的高强度训练",
+   "一张照片",
+   "专业动作捕捉服"
+  ],
+  "answer": "C",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "为了确保交互型数字人在复杂商业场景中的实用价值，训练师需要重点关注其什么能力？",
+  "options": [
+   "播放4K超清视频",
+   "理解上下文逻辑并像金牌导购一样预判需求",
+   "自动生成Office文档",
+   "进行高等数学运算"
+  ],
+  "answer": "B",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "相比传统视频制作，AI数字人短视频的核心优势不包括？",
+  "options": [
+   "制作成本低",
+   "制作周期短",
+   "减少人力投入",
+   "现场实地拍摄灵活性高"
+  ],
+  "answer": "D",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "当训练金融领域的数字人员工时，降低“回答幻觉率”最关键的举措是？",
+  "options": [
+   "增加表情包数量",
+   "接入精准的垂直领域业务知识库",
+   "加大虚拟背景的亮度",
+   "提高语音播放速度"
+  ],
+  "answer": "B",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "AI主播训练中，实现“实时口型同步”主要依赖什么技术？",
+  "options": [
+   "文本转语音（TTS）",
+   "自然语言处理（NLP）",
+   "视觉捕捉与面部动作映射",
+   "语音识别（ASR）"
+  ],
+  "answer": "C",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "数字人训练师在处理用户数据时，首要考虑的因素是？",
+  "options": [
+   "数据量大小",
+   "数据标注格式",
+   "数据来源可靠性",
+   "数据安全性与隐私保护"
+  ],
+  "answer": "D",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "AI数字人短视频的制作流程通常不包括以下哪个步骤？",
+  "options": [
+   "脚本编写",
+   "角色设计",
+   "实地拍摄",
+   "后期剪辑"
+  ],
+  "answer": "C",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "在AI主播情感训练中，“情感标签维度”通常包括愉悦度、激活度和？",
+  "options": [
+   "复杂度（Complexity）",
+   "真实度（Authenticity）",
+   "支配度（Dominance）",
+   "流畅度（Fluency）"
+  ],
+  "answer": "C",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "数字人训练师团队人员构成往往多元化，其原因是？",
+  "options": [
+   "数字人技术已完全成熟，不需要技术背景",
+   "数字人训练需要感性与共情，且需理解“人”、“行业”与“表达”",
+   "该项目不需要编写任何代码",
+   "主要依靠外包团队完成"
+  ],
+  "answer": "B",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "训练数字人主播进行产品展示时，为了增强说服力，训练师应重点设计？",
+  "options": [
+   "仅保留纯文字讲解",
+   "声音、表情、动作与文本的高度统一联动",
+   "只播放背景音乐",
+   "简化所有肢体动作"
+  ],
+  "answer": "B",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "针对县级融媒体中心或XR演播室场景，AI主播的“本地化适配”训练重点不包括？",
+  "options": [
+   "方言词汇库构建",
+   "本地新闻事件库",
+   "民俗文化表情库",
+   "国际新闻翻译通用模型"
+  ],
+  "answer": "D",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "在处理数字人语音交互业务时，针对语义分析问题的文本类数据预处理通常包括？",
+  "options": [
+   "标注分词、句法判别等操作",
+   "数据无序存储",
+   "视频帧率调整",
+   "图像色彩校正"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "哪种交互方式允许用户通过手势和动作与计算机进行交互？",
+  "options": [
+   "体感设备",
+   "键盘和鼠标",
+   "语音识别",
+   "头盔"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "为什么需要梳理业务流程？",
+  "options": [
+   "为了制定业务数据的采集、处理、审核流程",
+   "为了详细了解公司的人员组成",
+   "为了修改公司的业务目标",
+   "为了便于管理资金"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "处理单个业务数据时需要兼顾哪些方面？",
+  "options": [
+   "业务流程和数据特征",
+   "系统硬件配置和网络带宽",
+   "处理时间和数据存储空间",
+   "系统安全性和数据来源可靠性"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "用于语义分析问题的文本类业务数据需要进行怎样的预处理？",
+  "options": [
+   "需要进行标注分词、句法判别等操作。",
+   "需要进行数据存储操作。",
+   "需要进行文本统计分析操作。",
+   "不需要进行预处理。"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "什么是特征工程？",
+  "options": [
+   "将文本转化为更容易结构化的数值数据特征。",
+   "对文本进行无序存储。",
+   "对文本进行清洗和标注操作。",
+   "对文本进行数据分析和统计操作。"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "视觉类数据以什么方式存储？",
+  "options": [
+   "点阵图像",
+   "音频",
+   "数字",
+   "文字"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "图像描述主要使用什么方式进行？",
+  "options": [
+   "文本描述",
+   "数字编码",
+   "图形符号",
+   "听觉信号"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "对电影和音乐进行个性化推荐，可以使用哪个方法？",
+  "options": [
+   "协同过滤",
+   "文字识别",
+   "机器人控制",
+   "空气质量监测"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "最优化决策中，可以利用人工智能计算来实现什么？",
+  "options": [
+   "最大化业务指标",
+   "最小化系统节点",
+   "最少的费用",
+   "最低风险决策"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "业务构建流程的目的是什么？",
+  "options": [
+   "描述系统功能",
+   "分析市场需求",
+   "优化业务流程",
+   "制定战略目标"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "业务流程优化的主要目标是？",
+  "options": [
+   "提高效率",
+   "增加成本",
+   "扩大规模",
+   "提高风险"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "智能系统改造法是从哪个前提出发，来设计新的业务流程？",
+  "options": [
+   "经营环境稳定性",
+   "成本降低",
+   "外部竞争力",
+   "业务流程图"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "远程智能诊疗是指通过什么方式对患者进行疾病诊断及治疗的过程？",
+  "options": [
+   "患者的视频",
+   "患者的电子病历",
+   "患者的面诊",
+   "患者的电话咨询"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "业务流程优化中的流程分析包括？",
+  "options": [
+   "理解步骤、活动和决策点之间的关系",
+   "降低成本",
+   "提高效率",
+   "技术支持和自动化"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "在复杂综合业务流程优化中，下列哪项是确定的优化目标？",
+  "options": [
+   "提高效率",
+   "增加复杂性",
+   "增加成本",
+   "降低质量"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "数据处理中，数据清洗的目的是什么？",
+  "options": [
+   "取得高质量的数据",
+   "将数据划分为不同的标注任务",
+   "对标注数据进行审核",
+   "对质检合格的数据进行抽检"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "远程智能诊疗是指通过什么方式对患者进行疾病诊断及治疗的过程？",
+  "options": [
+   "患者的视频",
+   "患者的电子病历",
+   "患者的面诊",
+   "患者的电话咨询"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "文本类数据清洗的目的是什么？",
+  "options": [
+   "提高数据可用性",
+   "挖掘数据的价值",
+   "提高数据安全性",
+   "提高数据传输速度"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "属性标注是对事物属性进行标签，它包括以下哪些标注类型？",
+  "options": [
+   "文本类别标注",
+   "指向关系标注",
+   "词性标注",
+   "实体标注"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "在文本类标注质量规范中，中文分词的质量标准是什么？",
+  "options": [
+   "标注好的分词必须与词典中的词语一致，不存在歧义",
+   "标注好的分词必须包含所有可能的分词结果",
+   "标注好的分词必须考虑文本的上下文",
+   "标注好的分词必须包含所有专有名词"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "某公司需要对产品订单进行标注，提取订单中商品名称、购买数量、商品价格、订单日期，该标注属于以下哪种标注？",
+  "options": [
+   "实体标注",
+   "关系标注",
+   "情感标注",
+   "属性标注"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "视觉类数据清洗规范需要根据什么进行制定？",
+  "options": [
+   "业务需求",
+   "存储空间大小",
+   "训练模型数量",
+   "数据采集时间"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "在视觉类数据清洗规范中，为什么需要去除已损坏图像或视频？",
+  "options": [
+   "无法进行模型训练",
+   "占用了大量的存储空间",
+   "数据价值低",
+   "所有选项都正确"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "在智能产品设计和开发阶段，什么是AI开发所特有的极其重要的环节？",
+  "options": [
+   "数据准备",
+   "材料购置",
+   "人员配备",
+   "项目评估"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "智能产品最后是以硬件形式呈现，需对产品进行什么操作？",
+  "options": [
+   "工业设计、结构设计、硬件设计",
+   "物理设计、逻辑设计、硬件设计",
+   "结构设计、硬件设计、软件设计",
+   "工业设计、硬件设计、软件设计"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "针对Tensorflow中Keras序列模型，用于模型评估的evaluate函数，其默认返回值通常是？",
+  "options": [
+   "损失值和准确率",
+   "预测值和实际值",
+   "准确率和精确率",
+   "精确率和召回率"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "针对Tensorflow中Keras序列模型model，model.compile函数中用于指定损失函数的参数为？",
+  "options": [
+   "loss",
+   "metrics",
+   "optimizer",
+   "rossentropy"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "人工智能分类算法测试常见的评价指标不包括？",
+  "options": [
+   "运行时间",
+   "准确率",
+   "精确率",
+   "召回率"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "以下不支持AI在线开发功能的平台是？",
+  "options": [
+   "苹果手机“OpenAI ChatGPT”应用",
+   "百度飞浆EasyDL",
+   "华为云",
+   "阿里云AI平台"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "人工与智能的视觉交互方式不包括？",
+  "options": [
+   "情感识别",
+   "手势识别",
+   "表情识别",
+   "姿态识别"
+  ],
+  "answer": "A",
+  "explanation": "",
+  "difficulty": 2,
+  "source": "官方样题"
+ },
+ {
+  "type": "single",
+  "module": "职业道德与基础知识",
+  "stem": "《人工智能训练师国家职业技能标准（2021年版）》中，以下不属于职业守则内容的是？",
+  "options": [
+   "诚实公正，严谨求是",
+   "遵章守法，恪尽职守",
+   "勤勉好学，追求卓越",
+   "追求利润，快速扩张"
+  ],
+  "answer": "D",
+  "explanation": "职业守则三条：诚实公正、严谨求是；遵章守法、恪尽职守；勤勉好学、追求卓越。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "职业道德与基础知识",
+  "stem": "人工智能训练师的职业编码是？",
+  "options": [
+   "4-04-05-05",
+   "4-05-05-04",
+   "6-04-05-05",
+   "4-04-06-05"
+  ],
+  "answer": "A",
+  "explanation": "职业编码 4-04-05-05；人工智能数字人训练师是 2024 年 7 月在该职业下增设的工种。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "职业道德与基础知识",
+  "stem": "\"人工智能数字人训练师\"作为新工种增设的时间与归属是？",
+  "options": [
+   "2024年7月，归属\"人工智能训练师\"职业",
+   "2021年11月，归属\"人工智能工程技术人员\"职业",
+   "2020年7月，归属\"数据标注员\"工种",
+   "2025年1月，独立新职业"
+  ],
+  "answer": "A",
+  "explanation": "2024年7月人社部在人工智能训练师（4-04-05-05）职业下增设数字人训练师工种。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "职业道德与基础知识",
+  "stem": "《人工智能训练师国家职业技能标准》中，本职业包含的工种是？",
+  "options": [
+   "数据标注员、人工智能算法测试员",
+   "数据分析师、算法工程师",
+   "产品经理、测试工程师",
+   "运维工程师、安全工程师"
+  ],
+  "answer": "A",
+  "explanation": "标准明确本职业包含数据标注员、人工智能算法测试员两个工种（2024年后另增设数字人训练师）。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "judge",
+  "module": "职业道德与基础知识",
+  "stem": "理论知识考试、技能考核均实行百分制，成绩皆达 60 分（含）以上为合格。",
+  "options": [
+   "正确",
+   "错误"
+  ],
+  "answer": "A",
+  "explanation": "标准 1.9.2：理论知识考试、技能考核和综合评审均实行百分制，60 分合格。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "职业道德与基础知识",
+  "stem": "按标准要求，三级/高级工理论知识考试时间不少于多少分钟？",
+  "options": [
+   "45",
+   "60",
+   "90",
+   "120"
+  ],
+  "answer": "C",
+  "explanation": "理论知识考试不少于 90min，技能考核不少于 120min，综合评审不少于 30min。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "职业道德与基础知识",
+  "stem": "人工智能训练师的职业能力特征要求包括？",
+  "options": [
+   "具有一定的学习能力、表达能力、计算能力，空间感、色觉正常",
+   "只需编程能力",
+   "只需英语阅读能力",
+   "只需管理能力"
+  ],
+  "answer": "A",
+  "explanation": "标准 1.6 职业能力特征原文。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "multi",
+  "module": "职业道德与基础知识",
+  "stem": "以下属于人工智能训练师应了解的相关法律法规有？",
+  "options": [
+   "《劳动法》",
+   "《劳动合同法》",
+   "《网络安全法》",
+   "《知识产权法》"
+  ],
+  "answer": "ABCD",
+  "explanation": "标准 2.2.2 相关法律、法规知识包含以上四部。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "人工智能数字人训练师的核心工作内容不包括？",
+  "options": [
+   "筛选结构化数据",
+   "设计提示词（Prompt）框架",
+   "为数字人配置表情、动作与场景互动",
+   "设计底层GPU架构"
+  ],
+  "answer": "D",
+  "explanation": "数字人训练师核心工作：筛选结构化数据、设计提示词、构建知识库、配置多模态交互，不涉及底层硬件。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "TTS 技术的中文全称是？",
+  "options": [
+   "文本转语音",
+   "语音转文本",
+   "光学字符识别",
+   "自然语言处理"
+  ],
+  "answer": "A",
+  "explanation": "TTS=Text To Speech 文本转语音；ASR=自动语音识别（语音转文本）。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "ASR 技术是指？",
+  "options": [
+   "自动语音识别",
+   "文本转语音",
+   "图像生成",
+   "动作捕捉"
+  ],
+  "answer": "A",
+  "explanation": "ASR=Automatic Speech Recognition，语音识别，把人说的话转成文字。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "以下哪项不是数字人\"多模态联动\"的典型模态？",
+  "options": [
+   "语音",
+   "表情",
+   "动作",
+   "硬盘转速"
+  ],
+  "answer": "D",
+  "explanation": "多模态联动指语音、表情、动作（可加文本/场景）协同呈现，硬盘转速是硬件指标。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "judge",
+  "module": "数字人专项",
+  "stem": "接入垂直领域知识库是降低数字人回答幻觉率的关键手段。",
+  "options": [
+   "正确",
+   "错误"
+  ],
+  "answer": "A",
+  "explanation": "严肃场景（金融、医疗等）靠精准业务知识库约束生成内容，降低幻觉。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "为数字人设计\"人设\"时，最直接有效的技术手段是？",
+  "options": [
+   "设计提示词（Prompt）框架并定义人格特征",
+   "提高渲染分辨率",
+   "增加显卡数量",
+   "延长视频时长"
+  ],
+  "answer": "A",
+  "explanation": "人格特征与交互逻辑主要通过 Prompt 框架与人设定义实现。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "multi",
+  "module": "数字人专项",
+  "stem": "数字人主播本地化适配训练可以包括？",
+  "options": [
+   "方言词汇库构建",
+   "本地新闻事件库",
+   "民俗文化表情库",
+   "通用国际翻译模型"
+  ],
+  "answer": "ABC",
+  "explanation": "本地化适配聚焦本地语言、事件、文化；通用翻译模型与本地化无关。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数字人专项",
+  "stem": "数字人直播带货中，\"情绪适配\"指的是？",
+  "options": [
+   "根据用户反馈与场景调整情绪表达",
+   "固定使用同一种表情",
+   "提高屏幕亮度",
+   "加快语速"
+  ],
+  "answer": "A",
+  "explanation": "情绪适配=根据互动情境动态调整数字人的情绪表现，增强真实感与亲和力。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "SQL 中为查询结果列起别名使用的关键字是？",
+  "options": [
+   "AS",
+   "IN",
+   "ON",
+   "BY"
+  ],
+  "answer": "A",
+  "explanation": "SELECT r.xm AS username ... 用 AS 定义别名（部分数据库可省略 AS）。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "SQL 语句 \"WHERE r.lx IN ('娱乐时事','政治时事')\" 的作用是？",
+  "options": [
+   "筛选资讯类型为指定枚举值的记录",
+   "按类型排序",
+   "去重",
+   "连接两表"
+  ],
+  "answer": "A",
+  "explanation": "IN 用于枚举多值等值过滤，等价于多个 OR 条件。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "BI 分析中，\"维度列\"与\"指标列\"的区别是？",
+  "options": [
+   "维度是观察角度（分类字段），指标是被度量数值（可聚合）",
+   "维度必须是数字，指标必须是文本",
+   "两者完全相同",
+   "指标不能聚合"
+  ],
+  "answer": "A",
+  "explanation": "维度用于分组观察（如年龄、类型），指标用于聚合度量（如访问次数 sum）。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "过滤条件\"年龄 18-22 且访问次数≥50\"中\"且\"对应的逻辑运算是？",
+  "options": [
+   "AND",
+   "OR",
+   "NOT",
+   "XOR"
+  ],
+  "answer": "A",
+  "explanation": "且=AND（同时满足），或=OR（满足其一）。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "协同过滤推荐算法的基本思想是？",
+  "options": [
+   "利用相似用户/物品的行为数据进行推荐",
+   "按热度排序推荐",
+   "随机推荐",
+   "按时间顺序推荐"
+  ],
+  "answer": "A",
+  "explanation": "协同过滤基于\"相似的人喜欢相似的物品\"假设，是电影/音乐个性化推荐的经典方法。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "业务分析",
+  "stem": "业务数据采集流程设计的首要输入是？",
+  "options": [
+   "人工智能技术要求与业务特征",
+   "服务器采购清单",
+   "办公场地平面图",
+   "员工通勤路线"
+  ],
+  "answer": "A",
+  "explanation": "标准三级 1.1.1：结合人工智能技术要求和业务特征设计整套业务数据采集流程。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "judge",
+  "module": "业务分析",
+  "stem": "梳理业务流程的目的是制定业务数据的采集、处理、审核流程。",
+  "options": [
+   "正确",
+   "错误"
+  ],
+  "answer": "A",
+  "explanation": "业务流程梳理服务于数据全生命周期管理：采集→处理→审核。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "pandas 中读取 CSV 文件的正确函数是？",
+  "options": [
+   "pd.read_csv()",
+   "pd.open_csv()",
+   "pd.load_csv()",
+   "pd.import_csv()"
+  ],
+  "answer": "A",
+  "explanation": "pd.read_csv('data.csv') 返回 DataFrame。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "查看 DataFrame 前 15 行的方法是？",
+  "options": [
+   "data.head(15)",
+   "data.top(15)",
+   "data.first(15)",
+   "data.show(15)"
+  ],
+  "answer": "A",
+  "explanation": "head(n) 默认前 5 行；describe() 输出描述性统计。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "multi",
+  "module": "智能训练",
+  "stem": "pandas 中处理缺失值与重复值的常用方法有？",
+  "options": [
+   "dropna()",
+   "drop_duplicates()",
+   "fillna()",
+   "groupby()"
+  ],
+  "answer": "ABC",
+  "explanation": "dropna 删缺失行、drop_duplicates 删重复行、fillna 填充缺失；groupby 是分组聚合。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "train_test_split(X, y, test_size=0.2) 表示？",
+  "options": [
+   "按 8:2 划分训练集与测试集",
+   "按 2:8 划分",
+   "取 20% 做交叉验证",
+   "重复抽样 20 次"
+  ],
+  "answer": "A",
+  "explanation": "test_size=0.2 即测试集占 20%（训练:测试=8:2），random_state 固定随机种子保证可复现。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "将一维 Series 转换为二维数组（单特征列）的正确写法是？",
+  "options": [
+   "X.values.reshape(-1, 1)",
+   "X.values.reshape(1, -1)",
+   "X.flatten()",
+   "X.stack()"
+  ],
+  "answer": "A",
+  "explanation": "reshape(-1,1)：行数自适应、1 列，满足 sklearn 对二维特征输入的要求。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "sklearn 中逻辑回归模型的类名是？",
+  "options": [
+   "LogisticRegression",
+   "LinearRegression",
+   "DecisionTree",
+   "KMeans"
+  ],
+  "answer": "A",
+  "explanation": "逻辑回归是分类算法：from sklearn.linear_model import LogisticRegression。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能训练",
+  "stem": "model.score(X_test, y_test) 对分类模型返回的是？",
+  "options": [
+   "准确率（accuracy）",
+   "损失值",
+   "训练时长",
+   "特征重要性"
+  ],
+  "answer": "A",
+  "explanation": "分类模型 score 返回准确率；回归模型返回 R²。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "multi",
+  "module": "数据处理与标注",
+  "stem": "以下属于常见数据标注类型的有？",
+  "options": [
+   "实体标注",
+   "关系标注",
+   "属性标注",
+   "情感标注"
+  ],
+  "answer": "ABCD",
+  "explanation": "还有词性标注、文本类别标注等；订单中提取商品名/数量/价格/日期属实体标注。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "数据处理与标注",
+  "stem": "数据清洗的最终目的是？",
+  "options": [
+   "增加数据总量",
+   "取得高质量数据",
+   "加密数据",
+   "压缩存储空间"
+  ],
+  "answer": "B",
+  "explanation": "清洗处理缺失、重复、异常，提升数据可用性与质量，为训练服务。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "judge",
+  "module": "智能训练",
+  "stem": "召回率（Recall）、精确率（Precision）、准确率（Accuracy）都是分类算法的常见评价指标。",
+  "options": [
+   "正确",
+   "错误"
+  ],
+  "answer": "A",
+  "explanation": "另有 F1、AUC 等；运行时间不属于效果评价指标。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "智能产品设计与开发阶段，AI 开发所特有的重要环节是？",
+  "options": [
+   "数据准备",
+   "材料购置",
+   "人员配备",
+   "场地租赁"
+  ],
+  "answer": "A",
+  "explanation": "数据是 AI 的燃料，数据准备（采集、清洗、标注）是 AI 开发特有环节。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "热力图最适合展示的数据关系是？",
+  "options": [
+   "两个分类维度上数值的强弱分布",
+   "时间趋势",
+   "占比构成",
+   "地理路线"
+  ],
+  "answer": "A",
+  "explanation": "热力图用颜色深浅表示交叉维度上的聚合值（如年龄×资讯类型的观看次数）。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "人机交互流程设计中，\"判定节点\"的作用是？",
+  "options": [
+   "根据条件走不同分支",
+   "开始或结束流程",
+   "执行处理动作",
+   "输入输出数据"
+  ],
+  "answer": "A",
+  "explanation": "菱形判定节点按条件（是/否）分流；圆角矩形是起止，矩形是处理。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "以下属于\"人工与智能视觉交互方式\"的是？",
+  "options": [
+   "手势识别",
+   "键盘输入",
+   "语音识别",
+   "鼠标点击"
+  ],
+  "answer": "A",
+  "explanation": "视觉交互：手势/表情/姿态识别；情感识别不属于视觉交互方式（样题考点）。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "智能系统监控与优化的正确工作链路是？",
+  "options": [
+   "数据分析→输出报告→提出优化需求→设计解决方案",
+   "直接更换硬件→重新开发",
+   "编写文档→归档→结束",
+   "上线→下线→再上线"
+  ],
+  "answer": "A",
+  "explanation": "标准三级 3.1：全面分析数据→分析报告→优化需求→智能解决方案。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "judge",
+  "module": "智能系统设计",
+  "stem": "Keras 中 model.compile() 的 loss 参数用于指定损失函数。",
+  "options": [
+   "正确",
+   "错误"
+  ],
+  "answer": "A",
+  "explanation": "loss=损失函数，optimizer=优化器，metrics=评估指标列表。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "智能系统设计",
+  "stem": "支持 AI 在线开发（零代码训练模型）的平台是？",
+  "options": [
+   "百度飞桨 EasyDL",
+   "Photoshop",
+   "Word",
+   "Excel"
+  ],
+  "answer": "A",
+  "explanation": "同类还有华为云、阿里云 AI 平台；ChatGPT 手机应用不是在线开发平台。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "培训与指导",
+  "stem": "按《标准》，三级/高级工应能编写的培训材料是？",
+  "options": [
+   "初级培训讲义",
+   "培训体系规划",
+   "培训策略制度",
+   "管理培训教材"
+  ],
+  "answer": "A",
+  "explanation": "三级4.1.1：能够编写初级培训讲义；培训体系规划、管理培训是一级/高级技师要求。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "培训与指导",
+  "stem": "三级/高级工的培训对象是？",
+  "options": [
+   "五级/初级工、四级/中级工",
+   "二级/技师",
+   "一级/高级技师",
+   "企业高层管理者"
+  ],
+  "answer": "A",
+  "explanation": "三级4.1.2：对五级/初级工、四级/中级工开展知识和技术培训；二级才对三级及以下培训。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "single",
+  "module": "培训与指导",
+  "stem": "三级/高级工的\"指导\"职能包括指导五级/四级解决哪些问题？",
+  "options": [
+   "数据采集、处理问题与数据标注问题",
+   "算法架构设计问题",
+   "硬件选型采购问题",
+   "公司战略规划问题"
+  ],
+  "answer": "A",
+  "explanation": "三级4.2：指导解决数据采集、处理问题和数据标注问题（实践教学方法、技术指导方法）。",
+  "difficulty": 2,
+  "source": "大纲手写"
+ },
+ {
+  "type": "judge",
+  "module": "培训与指导",
+  "stem": "按三级理论权重表，\"培训与指导\"占理论考核的 5%。",
+  "options": [
+   "正确",
+   "错误"
+  ],
+  "answer": "A",
+  "explanation": "三级理论权重：职道5+基础10+业务分析20+智能训练30+智能系统设计30+培训与指导5。",
+  "difficulty": 1,
+  "source": "大纲手写"
+ }
+]

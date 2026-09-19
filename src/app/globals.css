@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --bg: #07070c;
+  --card: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.09);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(1100px 500px at 85% -10%, rgba(139, 92, 246, 0.13), transparent 60%),
+    radial-gradient(900px 420px at -10% 15%, rgba(34, 211, 238, 0.08), transparent 55%),
+    var(--bg);
+  color: #e4e4e7;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC",
+    "Microsoft YaHei", "Segoe UI", sans-serif;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(12px);
+}
+
+.grad-text {
+  background: linear-gradient(120deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.grad-btn {
+  background: linear-gradient(120deg, #7c5cff, #0891b2);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s;
+  box-shadow: 0 8px 24px -8px rgba(124, 92, 255, 0.55);
+}
+.grad-btn:active {
+  transform: scale(0.97);
+}
+.grad-btn:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 0.35s ease both;
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.pulse-soft {
+  animation: pulseSoft 1.6s ease-in-out infinite;
+}
+
+.code-area {
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+/* prism 覆盖（配合 react-simple-code-editor 深色） */
+pre.code-editor {
+  color: #d4d4d8 !important;
+}
+.token.punctuation, .token.operator { color: #a1a1aa !important; }
+.token.keyword { color: #c4b5fd !important; }
+.token.string, .token.char { color: #86efac !important; }
+.token.number, .token.boolean { color: #fdba74 !important; }
+.token.comment { color: #71717a !important; font-style: italic; }
+.token.function { color: #67e8f9 !important; }
