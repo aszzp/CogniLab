@@ -1,0 +1,38 @@
+name: Content audit
+on:
+  push:
+    branches: [codex/syllabus-question-bank-expansion]
+  pull_request:
+    paths: ['data/**', 'docs/**', 'scripts/**', '.github/workflows/content-audit.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract source documents for audit
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils
+          mkdir -p audit/documents
+          for pdf in docs/*.pdf; do
+            name=$(basename "$pdf" .pdf)
+            pdftotext -layout "$pdf" "audit/documents/$name.txt"
+          done
+          tar --exclude=.git --exclude=audit -czf audit/repository.tar.gz .
+          for text in audit/documents/*.txt; do
+            echo "===== $text ====="
+            cat "$text"
+          done
+      - name: Validate content when validator is present
+        run: |
+          if [ -f scripts/validate-content.mjs ]; then
+            node scripts/validate-content.mjs
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: content-audit
+          path: audit/
+          retention-days: 3
