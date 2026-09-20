@@ -1,0 +1,6814 @@
+[
+  {
+    "key": "exp-sql-01",
+    "kind": "sql",
+    "category": "数据处理与标注",
+    "title": "SQL：筛选质检通过的合格语料",
+    "prompt": "语料库表 corpus_lines 记录每条语料的说话人、文本、时长（秒）与质检结论（quality：通过/驳回，未检为 NULL）。\n请查询时长 ≥ 10 秒且质检结论为「通过」的语料，输出 id、speaker、duration_sec 三列，按 id 升序排列。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "B02",
+      "C12"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE corpus_lines (id INTEGER, speaker TEXT, text TEXT, duration_sec INTEGER, quality TEXT);\nINSERT INTO corpus_lines VALUES\n(1,'主播A','欢迎来到直播间',12,'通过'),\n(2,'主播A','今天聊聊数字人训练',8,'通过'),\n(3,'主播B','下期节目预告',6,'驳回'),\n(4,'主播B','天气播报样例',15,NULL),\n(5,'主播C','产品功能讲解',20,'通过'),\n(6,'主播C','结尾感谢语',5,'驳回');",
+      "expectedSql": "SELECT id, speaker, duration_sec FROM corpus_lines WHERE duration_sec >= 10 AND quality = '通过' ORDER BY id",
+      "negativeSql": "SELECT id, speaker, duration_sec FROM corpus_lines WHERE duration_sec >= 10 ORDER BY id",
+      "expectedColumns": [
+        "id",
+        "speaker",
+        "duration_sec"
+      ],
+      "expectedRows": [
+        [
+          1,
+          "主播A",
+          12
+        ],
+        [
+          5,
+          "主播C",
+          20
+        ]
+      ],
+      "referenceAnswer": "WHERE 同时过滤时长与质检结论两个条件；NULL 与任何比较结果都不为真，因此未检语料自然被排除。ORDER BY id 保证输出顺序稳定。"
+    },
+    "referenceAnswer": "WHERE 同时过滤时长与质检结论两个条件；NULL 与任何比较结果都不为真，因此未检语料自然被排除。ORDER BY id 保证输出顺序稳定。"
+  },
+  {
+    "key": "exp-sql-02",
+    "kind": "sql",
+    "category": "数据处理与标注",
+    "title": "SQL：统计标注员工作量与平均通过率",
+    "prompt": "标注任务表 label_tasks 记录标注员（annotator）、批次（batch）、完成件数（pieces）与批次通过率（pass_rate）。\n请统计每位标注员的总件数 total_pieces 与平均通过率 avg_pass_rate（保留 3 位小数），只输出 annotator、total_pieces、avg_pass_rate 三列，按总件数降序、再按 annotator 升序。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "B03",
+      "C19"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE label_tasks (annotator TEXT, batch TEXT, pieces INTEGER, pass_rate REAL);\nINSERT INTO label_tasks VALUES\n('小张','B01',120,0.95),\n('小张','B02',80,0.9),\n('小李','B01',150,0.88),\n('小李','B03',60,0.92),\n('小王','B02',200,0.85),\n('小王','B04',100,0.98);",
+      "expectedSql": "SELECT annotator, SUM(pieces) AS total_pieces, ROUND(AVG(pass_rate), 3) AS avg_pass_rate FROM label_tasks GROUP BY annotator ORDER BY total_pieces DESC, annotator",
+      "negativeSql": "SELECT annotator, COUNT(*) AS total_pieces FROM label_tasks GROUP BY annotator",
+      "expectedColumns": [
+        "annotator",
+        "total_pieces",
+        "avg_pass_rate"
+      ],
+      "expectedRows": [
+        [
+          "小王",
+          300,
+          0.915
+        ],
+        [
+          "小李",
+          210,
+          0.9
+        ],
+        [
+          "小张",
+          200,
+          0.925
+        ]
+      ],
+      "referenceAnswer": "GROUP BY annotator 后用 SUM 聚合件数、AVG 聚合通过率，ROUND(...,3) 控制小数位；列别名需与要求一致。注意 COUNT(*) 统计的是行数不是件数。"
+    },
+    "referenceAnswer": "GROUP BY annotator 后用 SUM 聚合件数、AVG 聚合通过率，ROUND(...,3) 控制小数位；列别名需与要求一致。注意 COUNT(*) 统计的是行数不是件数。"
+  },
+  {
+    "key": "exp-sql-03",
+    "kind": "sql",
+    "category": "业务分析",
+    "title": "SQL：连接数据集表统计标注产出",
+    "prompt": "datasets 为数据集表（id、name），annotation_logs 为标注日志表（dataset_id 关联 datasets.id，pieces 为标注件数）。\n请用 JOIN 统计每个数据集的总标注件数，只保留总件数 ≥ 60 的数据集，输出 dataset（数据集名）、total_pieces 两列，按 total_pieces 降序、再按 dataset 升序。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C19"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE datasets (id INTEGER, name TEXT);\nCREATE TABLE annotation_logs (id INTEGER, dataset_id INTEGER, annotator TEXT, pieces INTEGER);\nINSERT INTO datasets VALUES (1,'客服问答'),(2,'直播话术'),(3,'本地方言');\nINSERT INTO annotation_logs VALUES\n(1,1,'小张',50),(2,1,'小李',30),(3,2,'小张',70),(4,2,'小王',10),(5,1,'小张',20);",
+      "expectedSql": "SELECT d.name AS dataset, SUM(l.pieces) AS total_pieces FROM annotation_logs l JOIN datasets d ON d.id = l.dataset_id GROUP BY d.name HAVING SUM(l.pieces) >= 60 ORDER BY total_pieces DESC, dataset",
+      "negativeSql": "SELECT l.annotator AS dataset, SUM(l.pieces) AS total_pieces FROM annotation_logs l JOIN datasets d ON d.id = l.dataset_id GROUP BY l.annotator",
+      "expectedColumns": [
+        "dataset",
+        "total_pieces"
+      ],
+      "expectedRows": [
+        [
+          "客服问答",
+          100
+        ],
+        [
+          "直播话术",
+          80
+        ]
+      ],
+      "referenceAnswer": "JOIN 按 dataset_id 关联两表；聚合后的过滤要用 HAVING 而不是 WHERE；别名 dataset 用于输出与排序。"
+    },
+    "referenceAnswer": "JOIN 按 dataset_id 关联两表；聚合后的过滤要用 HAVING 而不是 WHERE；别名 dataset 用于输出与排序。"
+  },
+  {
+    "key": "exp-sql-04",
+    "kind": "sql",
+    "category": "业务分析",
+    "title": "SQL：按渠道统计播放量并筛选重点渠道",
+    "prompt": "播放日志表 play_log 记录日期（dt）、渠道（channel）与播放次数（plays）。\n请统计各渠道的总播放量 total_plays，只保留总播放量 > 200 的渠道，输出 channel、total_plays，按总播放量降序。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C13"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE play_log (dt TEXT, channel TEXT, plays INTEGER);\nINSERT INTO play_log VALUES\n('2026-09-01','App',120),('2026-09-01','Web',80),\n('2026-09-02','App',150),('2026-09-02','小程序',60),\n('2026-09-03','App',90),('2026-09-03','Web',70);",
+      "expectedSql": "SELECT channel, SUM(plays) AS total_plays FROM play_log GROUP BY channel HAVING SUM(plays) > 200 ORDER BY total_plays DESC",
+      "negativeSql": "SELECT channel, SUM(plays) AS total_plays FROM play_log GROUP BY channel HAVING SUM(plays) > 100 ORDER BY total_plays DESC",
+      "expectedColumns": [
+        "channel",
+        "total_plays"
+      ],
+      "expectedRows": [
+        [
+          "App",
+          360
+        ]
+      ],
+      "referenceAnswer": "这是典型 BI 分组指标：GROUP BY channel + SUM 聚合，聚合值筛选必须用 HAVING；阈值条件（>200）写错会多出渠道。"
+    },
+    "referenceAnswer": "这是典型 BI 分组指标：GROUP BY channel + SUM 聚合，聚合值筛选必须用 HAVING；阈值条件（>200）写错会多出渠道。"
+  },
+  {
+    "key": "exp-sql-05",
+    "kind": "sql",
+    "category": "数据处理与标注",
+    "title": "SQL：复检结论查询与 NULL 归一化",
+    "prompt": "质检记录表 qa_records 记录语句（line_id）、质检员（checker）与结论（verdict：通过/驳回，尚未复检为 NULL）。\n请查询质检员「乙」的全部记录，输出 line_id 与 final_verdict 两列，其中 final_verdict 用 COALESCE 把 NULL 显示为「待复检」，按 line_id 升序。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "B04"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE qa_records (line_id INTEGER, checker TEXT, verdict TEXT);\nINSERT INTO qa_records VALUES\n(1,'甲','通过'),(2,'甲','驳回'),(2,'乙','通过'),\n(3,'乙',NULL),(4,'甲','通过'),(3,'甲','驳回');",
+      "expectedSql": "SELECT line_id, COALESCE(verdict, '待复检') AS final_verdict FROM qa_records WHERE checker = '乙' ORDER BY line_id",
+      "negativeSql": "SELECT line_id, verdict AS final_verdict FROM qa_records WHERE checker = '乙' ORDER BY line_id",
+      "expectedColumns": [
+        "line_id",
+        "final_verdict"
+      ],
+      "expectedRows": [
+        [
+          2,
+          "通过"
+        ],
+        [
+          3,
+          "待复检"
+        ]
+      ],
+      "referenceAnswer": "COALESCE(x, 备用值) 把 NULL 归一化为可读文案；NULL 是「未知」而非空字符串，直接输出会得到 NULL 单元格，与要求不符。"
+    },
+    "referenceAnswer": "COALESCE(x, 备用值) 把 NULL 归一化为可读文案；NULL 是「未知」而非空字符串，直接输出会得到 NULL 单元格，与要求不符。"
+  },
+  {
+    "key": "exp-sql-06",
+    "kind": "sql",
+    "category": "智能训练",
+    "title": "SQL：训练/测试集划分分布核对",
+    "prompt": "样本表 samples 记录每个样本的划分（split：train/test）与标签（label：0/1）。\n请统计每个（split, label）组合的样本数 n，输出 split、label、n 三列，先按 split 升序再按 label 升序。这是划分后核对类别分布的常规操作。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "D03",
+      "D20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE samples (id INTEGER, split TEXT, label INTEGER);\nINSERT INTO samples VALUES\n(1,'train',0),(2,'train',0),(3,'train',1),(4,'train',1),(5,'train',1),\n(6,'test',0),(7,'test',1),(8,'test',0);",
+      "expectedSql": "SELECT split, label, COUNT(*) AS n FROM samples GROUP BY split, label ORDER BY split, label",
+      "negativeSql": "SELECT split, COUNT(*) AS n FROM samples GROUP BY split ORDER BY split",
+      "expectedColumns": [
+        "split",
+        "label",
+        "n"
+      ],
+      "expectedRows": [
+        [
+          "test",
+          0,
+          2
+        ],
+        [
+          "test",
+          1,
+          1
+        ],
+        [
+          "train",
+          0,
+          2
+        ],
+        [
+          "train",
+          1,
+          3
+        ]
+      ],
+      "referenceAnswer": "按两列分组 GROUP BY split, label 得到交叉分布；少一列会改变输出列数与行数，判分都会判定不一致。"
+    },
+    "referenceAnswer": "按两列分组 GROUP BY split, label 得到交叉分布；少一列会改变输出列数与行数，判分都会判定不一致。"
+  },
+  {
+    "key": "exp-sql-07",
+    "kind": "sql",
+    "category": "智能系统设计",
+    "title": "SQL：统计各服务组件的错误事件数",
+    "prompt": "服务事件表 service_events 记录组件（component）、级别（level：ERROR/WARN/INFO）。\n请统计每个组件的 ERROR 事件数 errors，只统计级别为 ERROR 的事件，输出 component、errors，按错误数降序、再按 component 升序。用于发布后监控告警排查。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "E16"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE service_events (id INTEGER, component TEXT, level TEXT);\nINSERT INTO service_events VALUES\n(1,'tts','ERROR'),(2,'asr','WARN'),(3,'tts','ERROR'),\n(4,'nlu','ERROR'),(5,'asr','ERROR'),(6,'tts','WARN'),(7,'nlu','INFO');",
+      "expectedSql": "SELECT component, COUNT(*) AS errors FROM service_events WHERE level = 'ERROR' GROUP BY component ORDER BY errors DESC, component",
+      "negativeSql": "SELECT component, COUNT(*) AS errors FROM service_events GROUP BY component ORDER BY errors DESC, component",
+      "expectedColumns": [
+        "component",
+        "errors"
+      ],
+      "expectedRows": [
+        [
+          "tts",
+          2
+        ],
+        [
+          "asr",
+          1
+        ],
+        [
+          "nlu",
+          1
+        ]
+      ],
+      "referenceAnswer": "行级过滤（只看 ERROR）写在 WHERE；忘记 WHERE 会把 WARN/INFO 一起计数，属于监控口径错误。"
+    },
+    "referenceAnswer": "行级过滤（只看 ERROR）写在 WHERE；忘记 WHERE 会把 WARN/INFO 一起计数，属于监控口径错误。"
+  },
+  {
+    "key": "exp-sql-08",
+    "kind": "sql",
+    "category": "数字人专项",
+    "title": "SQL：直播场次观看 Top3 榜单",
+    "prompt": "直播场次表 live_sessions 记录主播（host）、观看人数（viewers）、礼物收入（gift_income）。\n请输出观看人数前 3 的场次，输出 host、viewers、gift_income；观看人数相同时礼物收入高者在前，仍相同时 id 小者在前。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "G15"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "initSql": "CREATE TABLE live_sessions (id INTEGER, host TEXT, viewers INTEGER, gift_income INTEGER);\nINSERT INTO live_sessions VALUES\n(1,'主播A',1200,3000),(2,'主播B',2500,1500),(3,'主播C',1800,4200),\n(4,'主播D',900,600),(5,'主播E',2500,800);",
+      "expectedSql": "SELECT host, viewers, gift_income FROM live_sessions ORDER BY viewers DESC, gift_income DESC, id LIMIT 3",
+      "negativeSql": "SELECT host, viewers, gift_income FROM live_sessions ORDER BY gift_income DESC LIMIT 3",
+      "expectedColumns": [
+        "host",
+        "viewers",
+        "gift_income"
+      ],
+      "expectedRows": [
+        [
+          "主播B",
+          2500,
+          1500
+        ],
+        [
+          "主播E",
+          2500,
+          800
+        ],
+        [
+          "主播C",
+          1800,
+          4200
+        ]
+      ],
+      "referenceAnswer": "多级排序：ORDER BY viewers DESC, gift_income DESC, id；LIMIT 3 取前三。排序键次序错误会改变入榜场次。"
+    },
+    "referenceAnswer": "多级排序：ORDER BY viewers DESC, gift_income DESC, id；LIMIT 3 取前三。排序键次序错误会改变入榜场次。"
+  },
+  {
+    "key": "exp-py-01",
+    "kind": "python",
+    "category": "数据处理与标注",
+    "title": "Python：语料缺失值与重复值清洗",
+    "prompt": "data.csv 是语料清单（line_id、text、duration），存在文本缺失与完全重复的行。\n请完成：\n1. 用 pandas 读取为变量 data；\n2. clean_na = 删除 text 缺失的行（只按 text 判断）；\n3. clean = 在 clean_na 基础上删除完全重复的行；\n4. 检查 clean 中 duration 仍缺失的行数与有效时长合计。\n变量名 data、clean_na、clean 需与上述一致，供检查点核对。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "B10",
+      "B19"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "line_id,text,duration\n1,你好欢迎,12\n2,产品介绍,8\n3,,15\n2,产品介绍,8\n4,结尾致谢,\n5,下期预告,10\n",
+      "starter": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\n# 1) 按 text 列删除缺失行 → clean_na\n# 2) 删除完全重复行 → clean\n",
+      "referenceCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\nclean_na = data.dropna(subset=['text'])\nclean = clean_na.drop_duplicates()\nprint(len(data), len(clean_na), len(clean))\n",
+      "negativeCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\nclean_na = data.dropna()\nclean = clean_na.drop_duplicates()\nprint(len(data), len(clean_na), len(clean))\n",
+      "checkpoints": [
+        {
+          "label": "读取 data.csv，列名完整",
+          "code": "assert list(data.columns) == ['line_id','text','duration'], data.columns",
+          "points": 2
+        },
+        {
+          "label": "clean_na：按 text 删除缺失后剩 5 行",
+          "code": "assert len(clean_na) == 5, len(clean_na)",
+          "points": 2
+        },
+        {
+          "label": "clean：删除完全重复后剩 4 行",
+          "code": "assert len(clean) == 4, len(clean)",
+          "points": 2
+        },
+        {
+          "label": "clean 中 duration 仍缺失 1 行（不能整行 dropna）",
+          "code": "assert clean['duration'].isna().sum() == 1, clean['duration'].isna().sum()",
+          "points": 2
+        },
+        {
+          "label": "clean 有效时长合计为 30",
+          "code": "assert int(clean['duration'].sum()) == 30, clean['duration'].sum()",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "缺失值处理要区分「关键字段缺失必须删」与「次要字段缺失可保留」：dropna(subset=['text']) 只删文本缺失；drop_duplicates() 去掉完全重复；duration 缺失保留并在统计时自动跳过。"
+    },
+    "referenceAnswer": "缺失值处理要区分「关键字段缺失必须删」与「次要字段缺失可保留」：dropna(subset=['text']) 只删文本缺失；drop_duplicates() 去掉完全重复；duration 缺失保留并在统计时自动跳过。"
+  },
+  {
+    "key": "exp-py-02",
+    "kind": "python",
+    "category": "数据处理与标注",
+    "title": "Python：标注结果分类统计",
+    "prompt": "data.csv 是图像标注结果（image_id、label、annotator）。\n请读取为 data，并用 value_counts / groupby 完成：\n1. 各标签的样本数（counts）；\n2. 各标注员完成的样本数；\n3. 标签×标注员的交叉表（cross）。\n变量名 data、counts、annotator_counts、cross 需与上述一致。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "B11",
+      "B20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "image_id,label,annotator\n1,猫,甲\n2,狗,乙\n3,猫,甲\n4,猫,乙\n5,狗,甲\n6,鸟,乙\n7,狗,甲\n",
+      "starter": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\n# counts = 各标签样本数\n# annotator_counts = 各标注员完成数\n# cross = 标签×标注员交叉表\n",
+      "referenceCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\ncounts = data['label'].value_counts()\nannotator_counts = data['annotator'].value_counts()\ncross = pd.crosstab(data['label'], data['annotator'])\nprint(counts, annotator_counts, cross.shape)\n",
+      "negativeCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\ncounts = data['label'].size\nannotator_counts = data['annotator'].unique()\ncross = data.groupby('annotator')['image_id'].count()\nprint(counts, annotator_counts, cross)\n",
+      "checkpoints": [
+        {
+          "label": "读取 data.csv",
+          "code": "assert list(data.columns) == ['image_id','label','annotator'], data.columns",
+          "points": 2
+        },
+        {
+          "label": "counts：猫类样本数为 3",
+          "code": "assert counts['猫'] == 3, counts.to_dict() if hasattr(counts, 'to_dict') else counts",
+          "points": 2
+        },
+        {
+          "label": "counts：狗类 3、鸟类 1",
+          "code": "assert counts['狗'] == 3 and counts['鸟'] == 1",
+          "points": 2
+        },
+        {
+          "label": "annotator_counts：标注员甲完成 4 条",
+          "code": "assert annotator_counts['甲'] == 4",
+          "points": 2
+        },
+        {
+          "label": "cross：交叉表形状为 3×2",
+          "code": "assert cross.shape == (3, 2), cross.shape",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "value_counts 用于一维频数统计；pd.crosstab 得到标签×标注员的交叉表，是标注分布与一致性抽检的常用视图。注意 value_counts 返回按频数降序的 Series，取值用字典式索引。"
+    },
+    "referenceAnswer": "value_counts 用于一维频数统计；pd.crosstab 得到标签×标注员的交叉表，是标注分布与一致性抽检的常用视图。注意 value_counts 返回按频数降序的 Series，取值用字典式索引。"
+  },
+  {
+    "key": "exp-py-03",
+    "kind": "python",
+    "category": "业务分析",
+    "title": "Python：观看行为特征工程",
+    "prompt": "data.csv 是用户观看行为表（user_id、age、gender、watch_min）。\n请读取为 data 并构造三个特征：\n1. is_adult：age ≥ 18 为 1 否则为 0（整数）；\n2. gender_dummies：对 gender 做 One-Hot（pd.get_dummies，前缀 gender）；\n3. watch_norm：watch_min 除以其最大值归一化。\n变量名 data、is_adult、gender_dummies、watch_norm 需与上述一致。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C07"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "user_id,age,gender,watch_min\n1,19,F,120\n2,25,M,300\n3,34,F,45\n4,47,M,520\n5,23,F,260\n",
+      "starter": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\n# is_adult = 成年标记（0/1）\n# gender_dummies = One-Hot\n# watch_norm = 时长归一化\n",
+      "referenceCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\nis_adult = (data['age'] >= 18).astype(int)\ngender_dummies = pd.get_dummies(data['gender'], prefix='gender')\nwatch_norm = data['watch_min'] / data['watch_min'].max()\nprint(is_adult.sum(), list(gender_dummies.columns), watch_norm.min())\n",
+      "negativeCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\nis_adult = (data['age'] > 18).astype(int)\ngender_dummies = pd.get_dummies(data['gender'])\nwatch_norm = data['watch_min'] - data['watch_min'].min()\nprint(is_adult.sum(), list(gender_dummies.columns), watch_norm.max())\n",
+      "checkpoints": [
+        {
+          "label": "读取 data.csv",
+          "code": "assert list(data.columns) == ['user_id','age','gender','watch_min'], data.columns",
+          "points": 2
+        },
+        {
+          "label": "is_adult 全部为 1（本表均成年）",
+          "code": "assert int(is_adult.sum()) == 5, is_adult.tolist() if hasattr(is_adult, 'tolist') else is_adult",
+          "points": 2
+        },
+        {
+          "label": "One-Hot 列为 gender_F / gender_M",
+          "code": "assert list(gender_dummies.columns) == ['gender_F','gender_M'], list(gender_dummies.columns)",
+          "points": 2
+        },
+        {
+          "label": "watch_norm 归一化后最大值为 1",
+          "code": "assert round(float(watch_norm.max()), 4) == 1.0, float(watch_norm.max())",
+          "points": 2
+        },
+        {
+          "label": "watch_norm 归一化后最小值为 45/520",
+          "code": "assert round(float(watch_norm.min()), 3) == round(45/520, 3), float(watch_norm.min())",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "布尔条件 astype(int) 生成 0/1 特征；get_dummies(prefix=...) 明确列名来源；除以最大值是最简单的线性归一化（min-max 的变体）。特征命名与口径要在团队内固定，避免后续训练特征错位。"
+    },
+    "referenceAnswer": "布尔条件 astype(int) 生成 0/1 特征；get_dummies(prefix=...) 明确列名来源；除以最大值是最简单的线性归一化（min-max 的变体）。特征命名与口径要在团队内固定，避免后续训练特征错位。"
+  },
+  {
+    "key": "exp-py-04",
+    "kind": "python",
+    "category": "智能训练",
+    "title": "Python：训练/测试划分与防泄漏核对",
+    "prompt": "data.csv 是 8 条样本（sample_id、f1、f2、label，标签 0/1 各 4 条）。\n请读取为 data，用 sklearn 的 train_test_split 完成划分：\n- 特征 X = data[['f1','f2']]，标签 y = data['label']；\n- test_size=0.25、random_state=42、stratify=y。\n变量名 X、y、X_train、X_test、y_train、y_test 需与上述一致。检查点会核对形状、分层与样本是否泄漏（同一行同时进入训练与测试）。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "D03",
+      "D20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "sample_id,f1,f2,label\n1,5.1,3.5,0\n2,4.9,3.0,0\n3,5.8,2.7,1\n4,6.0,3.4,1\n5,5.2,3.6,0\n6,4.7,3.2,0\n7,6.2,2.9,1\n8,5.9,3.0,1\n",
+      "starter": "import pandas as pd\nfrom sklearn.model_selection import train_test_split\n\ndata = pd.read_csv('data.csv')\nX = data[['f1', 'f2']]\ny = data['label']\n# X_train, X_test, y_train, y_test = train_test_split(..., test_size=0.25, random_state=42, stratify=y)\n",
+      "referenceCode": "import pandas as pd\nfrom sklearn.model_selection import train_test_split\n\ndata = pd.read_csv('data.csv')\nX = data[['f1', 'f2']]\ny = data['label']\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)\nprint(len(X_train), len(X_test), y_train.sum())\n",
+      "negativeCode": "import pandas as pd\nfrom sklearn.model_selection import train_test_split\n\ndata = pd.read_csv('data.csv')\nX = data[['f1', 'f2']]\ny = data['label']\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)\nX_train = pd.concat([X_train, X_test])\nprint(len(X_train), len(X_test), y_train.sum())\n",
+      "checkpoints": [
+        {
+          "label": "训练集 6 条、测试集 2 条",
+          "code": "assert len(X_train) == 6 and len(X_test) == 2, (len(X_train), len(X_test))",
+          "points": 2
+        },
+        {
+          "label": "分层后训练集正例为 3 条",
+          "code": "assert int(y_train.sum()) == 3, int(y_train.sum())",
+          "points": 2
+        },
+        {
+          "label": "测试集包含两个类别",
+          "code": "assert set(y_test.unique()) == {0, 1}, set(y_test.unique())",
+          "points": 2
+        },
+        {
+          "label": "训练/测试无样本泄漏（索引不相交）",
+          "code": "assert not (set(X_train.index) & set(X_test.index)), set(X_train.index) & set(X_test.index)",
+          "points": 2
+        },
+        {
+          "label": "特征列保持 f1、f2",
+          "code": "assert list(X_train.columns) == ['f1','f2'], list(X_train.columns)",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "train_test_split 用 test_size 控制比例、random_state 保证可复现、stratify=y 保持类别比例；划分后应核对形状、分布与索引不相交，三者共同构成「划分未泄漏」的证据。random_state 不同则抽样不同，检查点固定了 42。"
+    },
+    "referenceAnswer": "train_test_split 用 test_size 控制比例、random_state 保证可复现、stratify=y 保持类别比例；划分后应核对形状、分布与索引不相交，三者共同构成「划分未泄漏」的证据。random_state 不同则抽样不同，检查点固定了 42。"
+  },
+  {
+    "key": "exp-py-05",
+    "kind": "python",
+    "category": "智能训练",
+    "title": "Python：分类指标计算（准确率/精确率/召回率）",
+    "prompt": "data.csv 是模型预测结果（y_true 真实标签、y_pred 预测标签，取值 0/1）。\n请读取为 data，取出 y_true、y_pred 两个序列，计算：\n- acc：准确率；prec：精确率；rec：召回率；f1：F1 分数（可用 sklearn.metrics，保留 4 位小数核对）。\n另用 confusion_matrix 得到混淆矩阵 cm。\n变量名 y_true、y_pred、acc、prec、rec、f1、cm 需与上述一致。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "D10",
+      "D24"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "y_true,y_pred\n1,1\n0,0\n1,0\n0,0\n1,1\n0,1\n1,1\n0,0\n",
+      "starter": "import pandas as pd\nfrom sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix\n\ndata = pd.read_csv('data.csv')\ny_true = data['y_true']\ny_pred = data['y_pred']\n# acc / prec / rec / f1 / cm\n",
+      "referenceCode": "import pandas as pd\nfrom sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix\n\ndata = pd.read_csv('data.csv')\ny_true = data['y_true']\ny_pred = data['y_pred']\nacc = accuracy_score(y_true, y_pred)\nprec = precision_score(y_true, y_pred)\nrec = recall_score(y_true, y_pred)\nf1 = f1_score(y_true, y_pred)\ncm = confusion_matrix(y_true, y_pred)\nprint(acc, prec, rec, f1, cm.tolist())\n",
+      "negativeCode": "import pandas as pd\nfrom sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix\n\ndata = pd.read_csv('data.csv')\ny_true = data['y_true']\ny_pred = data['y_true']  # 错误：拿真实标签冒充预测\nacc = accuracy_score(y_true, y_pred)\nprec = precision_score(y_true, y_pred)\nrec = recall_score(y_true, y_pred)\ncm = confusion_matrix(y_true, y_pred)\nprint(acc, prec, rec, cm.tolist())\n",
+      "checkpoints": [
+        {
+          "label": "准确率 acc = 0.75",
+          "code": "acc = (y_true == y_pred).mean()\nassert round(float(acc), 4) == 0.75, acc",
+          "points": 2
+        },
+        {
+          "label": "精确率 prec = 0.75（TP3 / FP1）",
+          "code": "TP = int(((y_true == 1) & (y_pred == 1)).sum()); FP = int(((y_true == 0) & (y_pred == 1)).sum())\nassert round(TP / (TP + FP), 4) == 0.75, (TP, FP)",
+          "points": 2
+        },
+        {
+          "label": "召回率 rec = 0.75（TP3 / FN1）",
+          "code": "TP = int(((y_true == 1) & (y_pred == 1)).sum()); FN = int(((y_true == 1) & (y_pred == 0)).sum())\nassert round(TP / (TP + FN), 4) == 0.75, (TP, FN)",
+          "points": 2
+        },
+        {
+          "label": "F1 = 0.75",
+          "code": "TP = int(((y_true == 1) & (y_pred == 1)).sum()); FP = int(((y_true == 0) & (y_pred == 1)).sum()); FN = int(((y_true == 1) & (y_pred == 0)).sum())\nassert round(2*TP/(2*TP+FP+FN), 4) == 0.75",
+          "points": 2
+        },
+        {
+          "label": "混淆矩阵为 [[3,1],[1,3]]",
+          "code": "from sklearn.metrics import confusion_matrix\ncm = confusion_matrix(y_true, y_pred)\nassert cm.tolist() == [[3,1],[1,3]], cm.tolist()",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "TP=3、FP=1、FN=1、TN=3：准确率 (TP+TN)/N=0.75；精确率 TP/(TP+FP)=0.75；召回率 TP/(TP+FN)=0.75；F1 为二者的调和平均 0.75。sklearn.metrics 的同名函数可直接复算。"
+    },
+    "referenceAnswer": "TP=3、FP=1、FN=1、TN=3：准确率 (TP+TN)/N=0.75；精确率 TP/(TP+FP)=0.75；召回率 TP/(TP+FN)=0.75；F1 为二者的调和平均 0.75。sklearn.metrics 的同名函数可直接复算。"
+  },
+  {
+    "key": "exp-py-06",
+    "kind": "python",
+    "category": "智能训练",
+    "title": "Python：pandas 分组聚合分析订单",
+    "prompt": "data.csv 是订单表（order_id、city、category、amount、qty）。\n请读取为 data，用 groupby 完成：\n1. city_amount：各城市销售额合计（Series）；\n2. city_agg：各城市的 total（amount 合计）与 orders（order_id 计数）；\n3. 核对总销售额与品类计数。\n变量名 data、city_amount、city_agg 需与上述一致。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "D08"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "order_id,city,category,amount,qty\n1,北京,数码,1200,1\n2,上海,图书,80,3\n3,北京,图书,120,2\n4,广州,数码,900,1\n5,上海,数码,2500,2\n6,北京,家居,450,1\n7,广州,图书,60,4\n",
+      "starter": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\n# city_amount = 各城市销售额合计\n# city_agg = 各城市 total/orders\n",
+      "referenceCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\ncity_amount = data.groupby('city')['amount'].sum()\ncity_agg = data.groupby('city').agg(total=('amount', 'sum'), orders=('order_id', 'count'))\nprint(city_amount.to_dict(), city_agg.to_dict())\n",
+      "negativeCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\ncity_amount = data.groupby('city')['qty'].sum()\ncity_agg = data.groupby('category').agg(total=('amount', 'sum'), orders=('order_id', 'count'))\nprint(city_amount.to_dict(), city_agg.to_dict())\n",
+      "checkpoints": [
+        {
+          "label": "读取 data.csv",
+          "code": "assert list(data.columns) == ['order_id','city','category','amount','qty'], data.columns",
+          "points": 2
+        },
+        {
+          "label": "city_amount：上海销售额合计 2580",
+          "code": "assert int(city_amount['上海']) == 2580",
+          "points": 2
+        },
+        {
+          "label": "city_agg：北京订单数 3、销售额 1770",
+          "code": "assert int(city_agg.loc['北京','orders']) == 3 and int(city_agg.loc['北京','total']) == 1770, city_agg.to_dict()",
+          "points": 2
+        },
+        {
+          "label": "订单总销售额 5310",
+          "code": "assert int(data['amount'].sum()) == 5310",
+          "points": 2
+        },
+        {
+          "label": "city_amount：最大城市为上海",
+          "code": "assert city_amount.sort_values(ascending=False).index[0] == '上海', city_amount.to_dict()",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "groupby 后选列聚合得到 Series；.agg(named agg) 一次产出多指标 DataFrame。销售口径注意区分「按城市」与「按品类」分组，混用是最常见的业务分析错误。"
+    },
+    "referenceAnswer": "groupby 后选列聚合得到 Series；.agg(named agg) 一次产出多指标 DataFrame。销售口径注意区分「按城市」与「按品类」分组，混用是最常见的业务分析错误。"
+  },
+  {
+    "key": "exp-py-07",
+    "kind": "python",
+    "category": "业务分析",
+    "title": "Python：转化率与 ARPU/ARPPU 指标",
+    "prompt": "data.csv 是用户行为汇总（user_id、visits、orders、revenue）。\n请读取为 data 并计算：\n- conversion：下单用户占比（orders > 0 的比例，4 位小数）；\n- total_revenue：总收入；\n- arpu：总收入 / 总用户数；\n- arppu：总收入 / 下单用户数（2 位小数核对）。\n变量名 data、conversion、total_revenue、arpu、arppu 需与上述一致。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C13",
+      "C20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "user_id,visits,orders,revenue\n1,5,1,199\n2,3,0,0\n3,8,2,498\n4,1,0,0\n5,6,1,299\n6,2,0,0\n7,4,1,159\n",
+      "starter": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\n# conversion = 下单用户占比\n# total_revenue / arpu / arppu\n",
+      "referenceCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\nconversion = (data['orders'] > 0).mean()\ntotal_revenue = int(data['revenue'].sum())\narpu = data['revenue'].sum() / len(data)\narppu = data['revenue'].sum() / (data['orders'] > 0).sum()\nprint(round(float(conversion), 4), total_revenue, arpu, arppu)\n",
+      "negativeCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\nconversion = (data['visits'] > 0).mean()\ntotal_revenue = int(data['revenue'].sum())\narpu = data['revenue'].mean() / (data['orders'] > 0).sum()\narppu = data['revenue'].sum() / len(data)\nprint(round(float(conversion), 4), total_revenue, arpu, arppu)\n",
+      "checkpoints": [
+        {
+          "label": "读取 data.csv",
+          "code": "assert list(data.columns) == ['user_id','visits','orders','revenue'], data.columns",
+          "points": 2
+        },
+        {
+          "label": "conversion 转化率 ≈ 0.5714（4/7）",
+          "code": "assert round(float(conversion), 4) == 0.5714, conversion",
+          "points": 2
+        },
+        {
+          "label": "total_revenue 总收入 1155",
+          "code": "assert int(total_revenue) == 1155, total_revenue",
+          "points": 2
+        },
+        {
+          "label": "arpu = 165（按全体用户）",
+          "code": "assert round(float(arpu), 2) == 165.0, arpu",
+          "points": 2
+        },
+        {
+          "label": "arppu = 288.75（按下单用户）",
+          "code": "assert round(float(arppu), 2) == 288.75, arppu",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "转化率=下单用户/总用户；ARPU 按全体用户分摊，ARPPU 只按付费（下单）用户分摊，两者分母不同。口径写错分母是 BI 指标最常见的错误。"
+    },
+    "referenceAnswer": "转化率=下单用户/总用户；ARPU 按全体用户分摊，ARPPU 只按付费（下单）用户分摊，两者分母不同。口径写错分母是 BI 指标最常见的错误。"
+  },
+  {
+    "key": "exp-py-08",
+    "kind": "python",
+    "category": "数字人专项",
+    "title": "Python：数字人端到端质量加权得分",
+    "prompt": "data.csv 是数字人评测表（dimension 评测维度、score 得分、weight 权重，权重合计 1）。\n请读取为 data 并计算：\n- total：加权总分（score × weight 后求和，1 位小数）；\n- weakest：得分最低的维度名；\n- passed：total ≥ 85 为 True 否则 False。\n变量名 data、total、weakest、passed 需与上述一致。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "G20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "preload": "dimension,score,weight\n语音自然度,88,0.3\n口型同步,76,0.3\n知识准确率,92,0.4\n",
+      "starter": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\n# total = 加权总分\n# weakest = 得分最低维度\n# passed = 是否达标（≥85）\n",
+      "referenceCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\ntotal = float((data['score'] * data['weight']).sum())\nweakest = data.loc[data['score'].idxmin(), 'dimension']\npassed = total >= 85\nprint(round(total, 1), weakest, passed)\n",
+      "negativeCode": "import pandas as pd\n\ndata = pd.read_csv('data.csv')\ntotal = float(data['score'].mean())\nweakest = data.loc[data['score'].idxmax(), 'dimension']\npassed = total >= 85\nprint(round(total, 1), weakest, passed)\n",
+      "checkpoints": [
+        {
+          "label": "读取 data.csv",
+          "code": "assert list(data.columns) == ['dimension','score','weight'], data.columns",
+          "points": 2
+        },
+        {
+          "label": "权重合计为 1",
+          "code": "assert round(float(data['weight'].sum()), 4) == 1.0",
+          "points": 2
+        },
+        {
+          "label": "total 加权总分 86.0（非简单平均 85.3）",
+          "code": "assert round(float(total), 1) == 86.0, total",
+          "points": 2
+        },
+        {
+          "label": "weakest 最弱维度为口型同步",
+          "code": "assert weakest == '口型同步', weakest",
+          "points": 2
+        },
+        {
+          "label": "passed 达标判定为 True",
+          "code": "assert passed is True, passed",
+          "points": 2
+        }
+      ],
+      "referenceAnswer": "加权总分 = Σ(score×weight)，与简单平均（85.3）结果不同，评测口径必须写明；idxmin 定位最弱维度用于后续优化排期。上线判定阈值（85）应由验收方约定。"
+    },
+    "referenceAnswer": "加权总分 = Σ(score×weight)，与简单平均（85.3）结果不同，评测口径必须写明；idxmin 定位最弱维度用于后续优化排期。上线判定阈值（85）应由验收方约定。"
+  },
+  {
+    "key": "exp-chart-01",
+    "kind": "chart",
+    "category": "业务分析",
+    "title": "图表：18-30 岁娱乐/民生观看次数对比（柱状图）",
+    "prompt": "运营想看「18~30 岁用户」中「娱乐时事」与「民生时事」两个类型的记录条数对比。\n请把图表配置为：柱状图，行维度 type，列维度 age，指标 times，聚合 COUNT，年龄范围 18~30，勾选类型 娱乐时事、民生时事，标题「18-30岁娱乐与民生观看次数」，\n然后对照标准答案判分。",
+    "points": 8,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C13",
+      "E03"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "dataset": {
+        "columns": [
+          "age",
+          "type",
+          "times"
+        ],
+        "rows": [
+          [
+            18,
+            "娱乐时事",
+            6
+          ],
+          [
+            18,
+            "娱乐时事",
+            2
+          ],
+          [
+            18,
+            "政治时事",
+            4
+          ],
+          [
+            18,
+            "民生时事",
+            1
+          ],
+          [
+            18,
+            "民生时事",
+            8
+          ],
+          [
+            19,
+            "娱乐时事",
+            4
+          ],
+          [
+            19,
+            "娱乐时事",
+            3
+          ],
+          [
+            19,
+            "政治时事",
+            6
+          ],
+          [
+            19,
+            "政治时事",
+            1
+          ],
+          [
+            19,
+            "政治时事",
+            5
+          ],
+          [
+            19,
+            "民生时事",
+            7
+          ],
+          [
+            20,
+            "娱乐时事",
+            6
+          ],
+          [
+            20,
+            "政治时事",
+            2
+          ],
+          [
+            20,
+            "政治时事",
+            1
+          ],
+          [
+            20,
+            "民生时事",
+            9
+          ],
+          [
+            20,
+            "民生时事",
+            2
+          ],
+          [
+            20,
+            "民生时事",
+            4
+          ],
+          [
+            21,
+            "娱乐时事",
+            2
+          ],
+          [
+            21,
+            "娱乐时事",
+            4
+          ],
+          [
+            21,
+            "娱乐时事",
+            5
+          ],
+          [
+            21,
+            "政治时事",
+            3
+          ],
+          [
+            21,
+            "政治时事",
+            2
+          ],
+          [
+            21,
+            "政治时事",
+            9
+          ],
+          [
+            21,
+            "民生时事",
+            3
+          ],
+          [
+            21,
+            "民生时事",
+            5
+          ],
+          [
+            22,
+            "娱乐时事",
+            2
+          ],
+          [
+            22,
+            "政治时事",
+            4
+          ],
+          [
+            22,
+            "政治时事",
+            4
+          ],
+          [
+            22,
+            "政治时事",
+            1
+          ],
+          [
+            22,
+            "民生时事",
+            3
+          ],
+          [
+            22,
+            "民生时事",
+            8
+          ],
+          [
+            22,
+            "民生时事",
+            5
+          ],
+          [
+            23,
+            "娱乐时事",
+            6
+          ],
+          [
+            23,
+            "政治时事",
+            7
+          ],
+          [
+            23,
+            "政治时事",
+            6
+          ],
+          [
+            23,
+            "民生时事",
+            3
+          ],
+          [
+            24,
+            "娱乐时事",
+            1
+          ],
+          [
+            24,
+            "娱乐时事",
+            1
+          ],
+          [
+            24,
+            "政治时事",
+            7
+          ],
+          [
+            24,
+            "政治时事",
+            6
+          ],
+          [
+            24,
+            "民生时事",
+            3
+          ],
+          [
+            24,
+            "民生时事",
+            4
+          ],
+          [
+            24,
+            "民生时事",
+            5
+          ],
+          [
+            25,
+            "娱乐时事",
+            8
+          ],
+          [
+            25,
+            "娱乐时事",
+            5
+          ],
+          [
+            25,
+            "政治时事",
+            3
+          ],
+          [
+            25,
+            "政治时事",
+            3
+          ],
+          [
+            25,
+            "民生时事",
+            2
+          ],
+          [
+            25,
+            "民生时事",
+            3
+          ],
+          [
+            25,
+            "民生时事",
+            7
+          ],
+          [
+            26,
+            "娱乐时事",
+            9
+          ],
+          [
+            26,
+            "娱乐时事",
+            9
+          ],
+          [
+            26,
+            "娱乐时事",
+            8
+          ],
+          [
+            26,
+            "政治时事",
+            6
+          ],
+          [
+            26,
+            "政治时事",
+            5
+          ],
+          [
+            26,
+            "政治时事",
+            1
+          ],
+          [
+            26,
+            "民生时事",
+            4
+          ],
+          [
+            27,
+            "娱乐时事",
+            4
+          ],
+          [
+            27,
+            "政治时事",
+            7
+          ],
+          [
+            27,
+            "政治时事",
+            3
+          ],
+          [
+            27,
+            "政治时事",
+            9
+          ],
+          [
+            27,
+            "民生时事",
+            4
+          ],
+          [
+            28,
+            "娱乐时事",
+            4
+          ],
+          [
+            28,
+            "娱乐时事",
+            1
+          ],
+          [
+            28,
+            "政治时事",
+            5
+          ],
+          [
+            28,
+            "政治时事",
+            8
+          ],
+          [
+            28,
+            "政治时事",
+            6
+          ],
+          [
+            28,
+            "民生时事",
+            2
+          ],
+          [
+            28,
+            "民生时事",
+            8
+          ],
+          [
+            29,
+            "娱乐时事",
+            3
+          ],
+          [
+            29,
+            "娱乐时事",
+            1
+          ],
+          [
+            29,
+            "娱乐时事",
+            2
+          ],
+          [
+            29,
+            "政治时事",
+            7
+          ],
+          [
+            29,
+            "政治时事",
+            6
+          ],
+          [
+            29,
+            "政治时事",
+            8
+          ],
+          [
+            29,
+            "民生时事",
+            8
+          ],
+          [
+            30,
+            "娱乐时事",
+            1
+          ],
+          [
+            30,
+            "政治时事",
+            1
+          ],
+          [
+            30,
+            "民生时事",
+            8
+          ],
+          [
+            30,
+            "民生时事",
+            8
+          ],
+          [
+            31,
+            "娱乐时事",
+            5
+          ],
+          [
+            31,
+            "政治时事",
+            3
+          ],
+          [
+            31,
+            "民生时事",
+            1
+          ],
+          [
+            31,
+            "民生时事",
+            4
+          ],
+          [
+            32,
+            "娱乐时事",
+            3
+          ],
+          [
+            32,
+            "政治时事",
+            2
+          ],
+          [
+            32,
+            "政治时事",
+            2
+          ],
+          [
+            32,
+            "政治时事",
+            1
+          ],
+          [
+            32,
+            "民生时事",
+            1
+          ],
+          [
+            32,
+            "民生时事",
+            4
+          ],
+          [
+            33,
+            "娱乐时事",
+            5
+          ],
+          [
+            33,
+            "政治时事",
+            1
+          ],
+          [
+            33,
+            "政治时事",
+            7
+          ],
+          [
+            33,
+            "民生时事",
+            7
+          ],
+          [
+            33,
+            "民生时事",
+            4
+          ],
+          [
+            34,
+            "娱乐时事",
+            7
+          ],
+          [
+            34,
+            "娱乐时事",
+            6
+          ],
+          [
+            34,
+            "娱乐时事",
+            3
+          ],
+          [
+            34,
+            "政治时事",
+            1
+          ],
+          [
+            34,
+            "政治时事",
+            8
+          ],
+          [
+            34,
+            "民生时事",
+            1
+          ],
+          [
+            35,
+            "娱乐时事",
+            3
+          ],
+          [
+            35,
+            "政治时事",
+            6
+          ],
+          [
+            35,
+            "民生时事",
+            4
+          ],
+          [
+            35,
+            "民生时事",
+            5
+          ],
+          [
+            36,
+            "娱乐时事",
+            5
+          ],
+          [
+            36,
+            "娱乐时事",
+            4
+          ],
+          [
+            36,
+            "娱乐时事",
+            2
+          ],
+          [
+            36,
+            "政治时事",
+            6
+          ],
+          [
+            36,
+            "政治时事",
+            5
+          ],
+          [
+            36,
+            "政治时事",
+            9
+          ],
+          [
+            36,
+            "民生时事",
+            5
+          ],
+          [
+            36,
+            "民生时事",
+            9
+          ],
+          [
+            36,
+            "民生时事",
+            8
+          ],
+          [
+            37,
+            "娱乐时事",
+            5
+          ],
+          [
+            37,
+            "娱乐时事",
+            7
+          ],
+          [
+            37,
+            "政治时事",
+            9
+          ],
+          [
+            37,
+            "政治时事",
+            5
+          ],
+          [
+            37,
+            "政治时事",
+            9
+          ],
+          [
+            37,
+            "民生时事",
+            8
+          ],
+          [
+            37,
+            "民生时事",
+            4
+          ],
+          [
+            38,
+            "娱乐时事",
+            9
+          ],
+          [
+            38,
+            "政治时事",
+            6
+          ],
+          [
+            38,
+            "政治时事",
+            4
+          ],
+          [
+            38,
+            "民生时事",
+            8
+          ],
+          [
+            38,
+            "民生时事",
+            5
+          ],
+          [
+            38,
+            "民生时事",
+            4
+          ],
+          [
+            39,
+            "娱乐时事",
+            7
+          ],
+          [
+            39,
+            "娱乐时事",
+            1
+          ],
+          [
+            39,
+            "娱乐时事",
+            4
+          ],
+          [
+            39,
+            "政治时事",
+            9
+          ],
+          [
+            39,
+            "政治时事",
+            6
+          ],
+          [
+            39,
+            "民生时事",
+            7
+          ],
+          [
+            40,
+            "娱乐时事",
+            2
+          ],
+          [
+            40,
+            "政治时事",
+            3
+          ],
+          [
+            40,
+            "政治时事",
+            1
+          ],
+          [
+            40,
+            "民生时事",
+            5
+          ],
+          [
+            40,
+            "民生时事",
+            1
+          ],
+          [
+            40,
+            "民生时事",
+            4
+          ],
+          [
+            41,
+            "娱乐时事",
+            6
+          ],
+          [
+            41,
+            "政治时事",
+            7
+          ],
+          [
+            41,
+            "民生时事",
+            9
+          ],
+          [
+            42,
+            "娱乐时事",
+            4
+          ],
+          [
+            42,
+            "娱乐时事",
+            8
+          ],
+          [
+            42,
+            "政治时事",
+            4
+          ],
+          [
+            42,
+            "民生时事",
+            9
+          ],
+          [
+            42,
+            "民生时事",
+            6
+          ],
+          [
+            43,
+            "娱乐时事",
+            2
+          ],
+          [
+            43,
+            "政治时事",
+            3
+          ],
+          [
+            43,
+            "政治时事",
+            4
+          ],
+          [
+            43,
+            "民生时事",
+            3
+          ],
+          [
+            43,
+            "民生时事",
+            1
+          ],
+          [
+            44,
+            "娱乐时事",
+            7
+          ],
+          [
+            44,
+            "政治时事",
+            5
+          ],
+          [
+            44,
+            "政治时事",
+            9
+          ],
+          [
+            44,
+            "民生时事",
+            4
+          ],
+          [
+            45,
+            "娱乐时事",
+            4
+          ],
+          [
+            45,
+            "政治时事",
+            2
+          ],
+          [
+            45,
+            "民生时事",
+            8
+          ],
+          [
+            45,
+            "民生时事",
+            1
+          ],
+          [
+            45,
+            "民生时事",
+            5
+          ],
+          [
+            46,
+            "娱乐时事",
+            4
+          ],
+          [
+            46,
+            "政治时事",
+            7
+          ],
+          [
+            46,
+            "民生时事",
+            3
+          ],
+          [
+            46,
+            "民生时事",
+            6
+          ],
+          [
+            47,
+            "娱乐时事",
+            9
+          ],
+          [
+            47,
+            "娱乐时事",
+            4
+          ],
+          [
+            47,
+            "娱乐时事",
+            9
+          ],
+          [
+            47,
+            "政治时事",
+            4
+          ],
+          [
+            47,
+            "政治时事",
+            1
+          ],
+          [
+            47,
+            "政治时事",
+            2
+          ],
+          [
+            47,
+            "民生时事",
+            7
+          ],
+          [
+            48,
+            "娱乐时事",
+            9
+          ],
+          [
+            48,
+            "娱乐时事",
+            3
+          ],
+          [
+            48,
+            "政治时事",
+            3
+          ],
+          [
+            48,
+            "政治时事",
+            2
+          ],
+          [
+            48,
+            "民生时事",
+            6
+          ],
+          [
+            48,
+            "民生时事",
+            8
+          ],
+          [
+            48,
+            "民生时事",
+            7
+          ],
+          [
+            49,
+            "娱乐时事",
+            6
+          ],
+          [
+            49,
+            "政治时事",
+            7
+          ],
+          [
+            49,
+            "民生时事",
+            6
+          ],
+          [
+            49,
+            "民生时事",
+            4
+          ],
+          [
+            49,
+            "民生时事",
+            4
+          ],
+          [
+            50,
+            "娱乐时事",
+            6
+          ],
+          [
+            50,
+            "娱乐时事",
+            2
+          ],
+          [
+            50,
+            "政治时事",
+            8
+          ],
+          [
+            50,
+            "政治时事",
+            7
+          ],
+          [
+            50,
+            "民生时事",
+            5
+          ],
+          [
+            50,
+            "民生时事",
+            6
+          ]
+        ]
+      },
+      "target": {
+        "chartType": "bar",
+        "rowDim": "type",
+        "colDim": "age",
+        "metric": "times",
+        "agg": "count",
+        "ageRange": [
+          18,
+          30
+        ],
+        "types": [
+          "娱乐时事",
+          "民生时事"
+        ],
+        "title": "18-30岁娱乐与民生观看次数"
+      },
+      "expectedCells": [
+        {
+          "age": 18,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 18,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 19,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 19,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 20,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 20,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 21,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 21,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 22,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 22,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 23,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 23,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 24,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 24,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 25,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 25,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 26,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 26,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 27,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 27,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 28,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 28,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 29,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 29,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 30,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 30,
+          "type": "民生时事",
+          "value": 2
+        }
+      ],
+      "referenceAnswer": "口径：年龄过滤 18~30，仅保留娱乐/民生两类；指标为记录条数（COUNT），按类型出柱。注意 COUNT 数的是行数，与 SUM(times) 不同。"
+    },
+    "referenceAnswer": "口径：年龄过滤 18~30，仅保留娱乐/民生两类；指标为记录条数（COUNT），按类型出柱。注意 COUNT 数的是行数，与 SUM(times) 不同。"
+  },
+  {
+    "key": "exp-chart-02",
+    "kind": "chart",
+    "category": "业务分析",
+    "title": "图表：各年龄观看时长总和趋势（折线图）",
+    "prompt": "内容团队想看 20~40 岁全部三个类型合计的观看次数（SUM）随年龄变化的趋势。\n请配置：折线图，行维度 age，列维度 type，指标 times，聚合 SUM，年龄范围 20~40，勾选全部三个类型，标题「各年龄段观看次数总和」，\n然后对照标准答案判分。",
+    "points": 8,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C13",
+      "E18"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "dataset": {
+        "columns": [
+          "age",
+          "type",
+          "times"
+        ],
+        "rows": [
+          [
+            18,
+            "娱乐时事",
+            2
+          ],
+          [
+            18,
+            "政治时事",
+            5
+          ],
+          [
+            18,
+            "政治时事",
+            4
+          ],
+          [
+            18,
+            "政治时事",
+            5
+          ],
+          [
+            18,
+            "民生时事",
+            9
+          ],
+          [
+            18,
+            "民生时事",
+            1
+          ],
+          [
+            18,
+            "民生时事",
+            7
+          ],
+          [
+            19,
+            "娱乐时事",
+            3
+          ],
+          [
+            19,
+            "政治时事",
+            5
+          ],
+          [
+            19,
+            "政治时事",
+            3
+          ],
+          [
+            19,
+            "民生时事",
+            3
+          ],
+          [
+            19,
+            "民生时事",
+            7
+          ],
+          [
+            19,
+            "民生时事",
+            9
+          ],
+          [
+            20,
+            "娱乐时事",
+            8
+          ],
+          [
+            20,
+            "政治时事",
+            3
+          ],
+          [
+            20,
+            "民生时事",
+            2
+          ],
+          [
+            21,
+            "娱乐时事",
+            9
+          ],
+          [
+            21,
+            "政治时事",
+            4
+          ],
+          [
+            21,
+            "民生时事",
+            6
+          ],
+          [
+            21,
+            "民生时事",
+            1
+          ],
+          [
+            21,
+            "民生时事",
+            2
+          ],
+          [
+            22,
+            "娱乐时事",
+            8
+          ],
+          [
+            22,
+            "娱乐时事",
+            3
+          ],
+          [
+            22,
+            "娱乐时事",
+            5
+          ],
+          [
+            22,
+            "政治时事",
+            6
+          ],
+          [
+            22,
+            "民生时事",
+            1
+          ],
+          [
+            22,
+            "民生时事",
+            6
+          ],
+          [
+            22,
+            "民生时事",
+            4
+          ],
+          [
+            23,
+            "娱乐时事",
+            7
+          ],
+          [
+            23,
+            "娱乐时事",
+            4
+          ],
+          [
+            23,
+            "政治时事",
+            4
+          ],
+          [
+            23,
+            "政治时事",
+            5
+          ],
+          [
+            23,
+            "民生时事",
+            9
+          ],
+          [
+            23,
+            "民生时事",
+            8
+          ],
+          [
+            24,
+            "娱乐时事",
+            7
+          ],
+          [
+            24,
+            "政治时事",
+            8
+          ],
+          [
+            24,
+            "民生时事",
+            5
+          ],
+          [
+            24,
+            "民生时事",
+            8
+          ],
+          [
+            25,
+            "娱乐时事",
+            5
+          ],
+          [
+            25,
+            "政治时事",
+            5
+          ],
+          [
+            25,
+            "政治时事",
+            6
+          ],
+          [
+            25,
+            "民生时事",
+            8
+          ],
+          [
+            25,
+            "民生时事",
+            3
+          ],
+          [
+            26,
+            "娱乐时事",
+            6
+          ],
+          [
+            26,
+            "政治时事",
+            6
+          ],
+          [
+            26,
+            "政治时事",
+            2
+          ],
+          [
+            26,
+            "政治时事",
+            5
+          ],
+          [
+            26,
+            "民生时事",
+            1
+          ],
+          [
+            26,
+            "民生时事",
+            9
+          ],
+          [
+            27,
+            "娱乐时事",
+            5
+          ],
+          [
+            27,
+            "娱乐时事",
+            6
+          ],
+          [
+            27,
+            "政治时事",
+            1
+          ],
+          [
+            27,
+            "政治时事",
+            8
+          ],
+          [
+            27,
+            "民生时事",
+            2
+          ],
+          [
+            27,
+            "民生时事",
+            9
+          ],
+          [
+            28,
+            "娱乐时事",
+            2
+          ],
+          [
+            28,
+            "娱乐时事",
+            5
+          ],
+          [
+            28,
+            "政治时事",
+            5
+          ],
+          [
+            28,
+            "政治时事",
+            8
+          ],
+          [
+            28,
+            "政治时事",
+            3
+          ],
+          [
+            28,
+            "民生时事",
+            4
+          ],
+          [
+            28,
+            "民生时事",
+            1
+          ],
+          [
+            29,
+            "娱乐时事",
+            6
+          ],
+          [
+            29,
+            "娱乐时事",
+            6
+          ],
+          [
+            29,
+            "娱乐时事",
+            6
+          ],
+          [
+            29,
+            "政治时事",
+            3
+          ],
+          [
+            29,
+            "政治时事",
+            5
+          ],
+          [
+            29,
+            "政治时事",
+            6
+          ],
+          [
+            29,
+            "民生时事",
+            7
+          ],
+          [
+            29,
+            "民生时事",
+            2
+          ],
+          [
+            30,
+            "娱乐时事",
+            7
+          ],
+          [
+            30,
+            "政治时事",
+            8
+          ],
+          [
+            30,
+            "民生时事",
+            7
+          ],
+          [
+            31,
+            "娱乐时事",
+            1
+          ],
+          [
+            31,
+            "娱乐时事",
+            5
+          ],
+          [
+            31,
+            "政治时事",
+            1
+          ],
+          [
+            31,
+            "政治时事",
+            8
+          ],
+          [
+            31,
+            "民生时事",
+            6
+          ],
+          [
+            32,
+            "娱乐时事",
+            8
+          ],
+          [
+            32,
+            "政治时事",
+            8
+          ],
+          [
+            32,
+            "民生时事",
+            9
+          ],
+          [
+            33,
+            "娱乐时事",
+            3
+          ],
+          [
+            33,
+            "政治时事",
+            1
+          ],
+          [
+            33,
+            "政治时事",
+            9
+          ],
+          [
+            33,
+            "民生时事",
+            4
+          ],
+          [
+            34,
+            "娱乐时事",
+            5
+          ],
+          [
+            34,
+            "政治时事",
+            8
+          ],
+          [
+            34,
+            "政治时事",
+            7
+          ],
+          [
+            34,
+            "政治时事",
+            6
+          ],
+          [
+            34,
+            "民生时事",
+            5
+          ],
+          [
+            34,
+            "民生时事",
+            4
+          ],
+          [
+            34,
+            "民生时事",
+            2
+          ],
+          [
+            35,
+            "娱乐时事",
+            4
+          ],
+          [
+            35,
+            "政治时事",
+            8
+          ],
+          [
+            35,
+            "政治时事",
+            2
+          ],
+          [
+            35,
+            "政治时事",
+            2
+          ],
+          [
+            35,
+            "民生时事",
+            2
+          ],
+          [
+            36,
+            "娱乐时事",
+            7
+          ],
+          [
+            36,
+            "娱乐时事",
+            6
+          ],
+          [
+            36,
+            "娱乐时事",
+            4
+          ],
+          [
+            36,
+            "政治时事",
+            1
+          ],
+          [
+            36,
+            "政治时事",
+            9
+          ],
+          [
+            36,
+            "政治时事",
+            7
+          ],
+          [
+            36,
+            "民生时事",
+            1
+          ],
+          [
+            36,
+            "民生时事",
+            1
+          ],
+          [
+            36,
+            "民生时事",
+            5
+          ],
+          [
+            37,
+            "娱乐时事",
+            1
+          ],
+          [
+            37,
+            "政治时事",
+            4
+          ],
+          [
+            37,
+            "民生时事",
+            7
+          ],
+          [
+            38,
+            "娱乐时事",
+            9
+          ],
+          [
+            38,
+            "娱乐时事",
+            3
+          ],
+          [
+            38,
+            "政治时事",
+            7
+          ],
+          [
+            38,
+            "政治时事",
+            3
+          ],
+          [
+            38,
+            "政治时事",
+            9
+          ],
+          [
+            38,
+            "民生时事",
+            2
+          ],
+          [
+            38,
+            "民生时事",
+            8
+          ],
+          [
+            38,
+            "民生时事",
+            9
+          ],
+          [
+            39,
+            "娱乐时事",
+            3
+          ],
+          [
+            39,
+            "娱乐时事",
+            2
+          ],
+          [
+            39,
+            "政治时事",
+            6
+          ],
+          [
+            39,
+            "民生时事",
+            4
+          ],
+          [
+            40,
+            "娱乐时事",
+            1
+          ],
+          [
+            40,
+            "政治时事",
+            4
+          ],
+          [
+            40,
+            "政治时事",
+            6
+          ],
+          [
+            40,
+            "政治时事",
+            5
+          ],
+          [
+            40,
+            "民生时事",
+            1
+          ],
+          [
+            40,
+            "民生时事",
+            5
+          ],
+          [
+            40,
+            "民生时事",
+            6
+          ],
+          [
+            41,
+            "娱乐时事",
+            3
+          ],
+          [
+            41,
+            "娱乐时事",
+            5
+          ],
+          [
+            41,
+            "娱乐时事",
+            3
+          ],
+          [
+            41,
+            "政治时事",
+            6
+          ],
+          [
+            41,
+            "民生时事",
+            8
+          ],
+          [
+            41,
+            "民生时事",
+            6
+          ],
+          [
+            41,
+            "民生时事",
+            2
+          ],
+          [
+            42,
+            "娱乐时事",
+            7
+          ],
+          [
+            42,
+            "娱乐时事",
+            4
+          ],
+          [
+            42,
+            "政治时事",
+            5
+          ],
+          [
+            42,
+            "政治时事",
+            1
+          ],
+          [
+            42,
+            "民生时事",
+            3
+          ],
+          [
+            42,
+            "民生时事",
+            5
+          ],
+          [
+            42,
+            "民生时事",
+            1
+          ],
+          [
+            43,
+            "娱乐时事",
+            3
+          ],
+          [
+            43,
+            "娱乐时事",
+            1
+          ],
+          [
+            43,
+            "政治时事",
+            6
+          ],
+          [
+            43,
+            "政治时事",
+            3
+          ],
+          [
+            43,
+            "民生时事",
+            1
+          ],
+          [
+            43,
+            "民生时事",
+            1
+          ],
+          [
+            43,
+            "民生时事",
+            1
+          ],
+          [
+            44,
+            "娱乐时事",
+            7
+          ],
+          [
+            44,
+            "政治时事",
+            9
+          ],
+          [
+            44,
+            "民生时事",
+            9
+          ],
+          [
+            44,
+            "民生时事",
+            2
+          ],
+          [
+            44,
+            "民生时事",
+            7
+          ],
+          [
+            45,
+            "娱乐时事",
+            2
+          ],
+          [
+            45,
+            "娱乐时事",
+            8
+          ],
+          [
+            45,
+            "政治时事",
+            3
+          ],
+          [
+            45,
+            "政治时事",
+            6
+          ],
+          [
+            45,
+            "民生时事",
+            9
+          ],
+          [
+            46,
+            "娱乐时事",
+            3
+          ],
+          [
+            46,
+            "娱乐时事",
+            7
+          ],
+          [
+            46,
+            "政治时事",
+            8
+          ],
+          [
+            46,
+            "政治时事",
+            8
+          ],
+          [
+            46,
+            "政治时事",
+            8
+          ],
+          [
+            46,
+            "民生时事",
+            7
+          ],
+          [
+            46,
+            "民生时事",
+            3
+          ],
+          [
+            47,
+            "娱乐时事",
+            9
+          ],
+          [
+            47,
+            "娱乐时事",
+            5
+          ],
+          [
+            47,
+            "政治时事",
+            8
+          ],
+          [
+            47,
+            "民生时事",
+            5
+          ],
+          [
+            47,
+            "民生时事",
+            7
+          ],
+          [
+            47,
+            "民生时事",
+            7
+          ],
+          [
+            48,
+            "娱乐时事",
+            2
+          ],
+          [
+            48,
+            "娱乐时事",
+            6
+          ],
+          [
+            48,
+            "政治时事",
+            6
+          ],
+          [
+            48,
+            "民生时事",
+            8
+          ],
+          [
+            48,
+            "民生时事",
+            3
+          ],
+          [
+            48,
+            "民生时事",
+            8
+          ],
+          [
+            49,
+            "娱乐时事",
+            7
+          ],
+          [
+            49,
+            "政治时事",
+            1
+          ],
+          [
+            49,
+            "民生时事",
+            9
+          ],
+          [
+            50,
+            "娱乐时事",
+            5
+          ],
+          [
+            50,
+            "娱乐时事",
+            9
+          ],
+          [
+            50,
+            "政治时事",
+            6
+          ],
+          [
+            50,
+            "政治时事",
+            4
+          ],
+          [
+            50,
+            "民生时事",
+            3
+          ],
+          [
+            50,
+            "民生时事",
+            7
+          ],
+          [
+            50,
+            "民生时事",
+            2
+          ]
+        ]
+      },
+      "target": {
+        "chartType": "line",
+        "rowDim": "age",
+        "colDim": "type",
+        "metric": "times",
+        "agg": "sum",
+        "ageRange": [
+          20,
+          40
+        ],
+        "types": [
+          "娱乐时事",
+          "政治时事",
+          "民生时事"
+        ],
+        "title": "各年龄段观看次数总和"
+      },
+      "expectedCells": [
+        {
+          "age": 20,
+          "type": "娱乐时事",
+          "value": 8
+        },
+        {
+          "age": 20,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 20,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 21,
+          "type": "娱乐时事",
+          "value": 9
+        },
+        {
+          "age": 21,
+          "type": "政治时事",
+          "value": 4
+        },
+        {
+          "age": 21,
+          "type": "民生时事",
+          "value": 9
+        },
+        {
+          "age": 22,
+          "type": "娱乐时事",
+          "value": 16
+        },
+        {
+          "age": 22,
+          "type": "政治时事",
+          "value": 6
+        },
+        {
+          "age": 22,
+          "type": "民生时事",
+          "value": 11
+        },
+        {
+          "age": 23,
+          "type": "娱乐时事",
+          "value": 11
+        },
+        {
+          "age": 23,
+          "type": "政治时事",
+          "value": 9
+        },
+        {
+          "age": 23,
+          "type": "民生时事",
+          "value": 17
+        },
+        {
+          "age": 24,
+          "type": "娱乐时事",
+          "value": 7
+        },
+        {
+          "age": 24,
+          "type": "政治时事",
+          "value": 8
+        },
+        {
+          "age": 24,
+          "type": "民生时事",
+          "value": 13
+        },
+        {
+          "age": 25,
+          "type": "娱乐时事",
+          "value": 5
+        },
+        {
+          "age": 25,
+          "type": "政治时事",
+          "value": 11
+        },
+        {
+          "age": 25,
+          "type": "民生时事",
+          "value": 11
+        },
+        {
+          "age": 26,
+          "type": "娱乐时事",
+          "value": 6
+        },
+        {
+          "age": 26,
+          "type": "政治时事",
+          "value": 13
+        },
+        {
+          "age": 26,
+          "type": "民生时事",
+          "value": 10
+        },
+        {
+          "age": 27,
+          "type": "娱乐时事",
+          "value": 11
+        },
+        {
+          "age": 27,
+          "type": "政治时事",
+          "value": 9
+        },
+        {
+          "age": 27,
+          "type": "民生时事",
+          "value": 11
+        },
+        {
+          "age": 28,
+          "type": "娱乐时事",
+          "value": 7
+        },
+        {
+          "age": 28,
+          "type": "政治时事",
+          "value": 16
+        },
+        {
+          "age": 28,
+          "type": "民生时事",
+          "value": 5
+        },
+        {
+          "age": 29,
+          "type": "娱乐时事",
+          "value": 18
+        },
+        {
+          "age": 29,
+          "type": "政治时事",
+          "value": 14
+        },
+        {
+          "age": 29,
+          "type": "民生时事",
+          "value": 9
+        },
+        {
+          "age": 30,
+          "type": "娱乐时事",
+          "value": 7
+        },
+        {
+          "age": 30,
+          "type": "政治时事",
+          "value": 8
+        },
+        {
+          "age": 30,
+          "type": "民生时事",
+          "value": 7
+        },
+        {
+          "age": 31,
+          "type": "娱乐时事",
+          "value": 6
+        },
+        {
+          "age": 31,
+          "type": "政治时事",
+          "value": 9
+        },
+        {
+          "age": 31,
+          "type": "民生时事",
+          "value": 6
+        },
+        {
+          "age": 32,
+          "type": "娱乐时事",
+          "value": 8
+        },
+        {
+          "age": 32,
+          "type": "政治时事",
+          "value": 8
+        },
+        {
+          "age": 32,
+          "type": "民生时事",
+          "value": 9
+        },
+        {
+          "age": 33,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 33,
+          "type": "政治时事",
+          "value": 10
+        },
+        {
+          "age": 33,
+          "type": "民生时事",
+          "value": 4
+        },
+        {
+          "age": 34,
+          "type": "娱乐时事",
+          "value": 5
+        },
+        {
+          "age": 34,
+          "type": "政治时事",
+          "value": 21
+        },
+        {
+          "age": 34,
+          "type": "民生时事",
+          "value": 11
+        },
+        {
+          "age": 35,
+          "type": "娱乐时事",
+          "value": 4
+        },
+        {
+          "age": 35,
+          "type": "政治时事",
+          "value": 12
+        },
+        {
+          "age": 35,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 36,
+          "type": "娱乐时事",
+          "value": 17
+        },
+        {
+          "age": 36,
+          "type": "政治时事",
+          "value": 17
+        },
+        {
+          "age": 36,
+          "type": "民生时事",
+          "value": 7
+        },
+        {
+          "age": 37,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 37,
+          "type": "政治时事",
+          "value": 4
+        },
+        {
+          "age": 37,
+          "type": "民生时事",
+          "value": 7
+        },
+        {
+          "age": 38,
+          "type": "娱乐时事",
+          "value": 12
+        },
+        {
+          "age": 38,
+          "type": "政治时事",
+          "value": 19
+        },
+        {
+          "age": 38,
+          "type": "民生时事",
+          "value": 19
+        },
+        {
+          "age": 39,
+          "type": "娱乐时事",
+          "value": 5
+        },
+        {
+          "age": 39,
+          "type": "政治时事",
+          "value": 6
+        },
+        {
+          "age": 39,
+          "type": "民生时事",
+          "value": 4
+        },
+        {
+          "age": 40,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 40,
+          "type": "政治时事",
+          "value": 15
+        },
+        {
+          "age": 40,
+          "type": "民生时事",
+          "value": 12
+        }
+      ],
+      "referenceAnswer": "趋势图行维度应为 age（横轴年龄）；SUM 汇总三个类型的 times。勾选类型不全或用 COUNT 都会与标准答案不一致。"
+    },
+    "referenceAnswer": "趋势图行维度应为 age（横轴年龄）；SUM 汇总三个类型的 times。勾选类型不全或用 COUNT 都会与标准答案不一致。"
+  },
+  {
+    "key": "exp-chart-03",
+    "kind": "chart",
+    "category": "智能系统设计",
+    "title": "图表：25-45 岁娱乐/政治平均观看热力图",
+    "prompt": "分析「25~45 岁」用户在「娱乐时事」与「政治时事」上的平均单条观看次数（AVG，保留 1 位小数）分布。\n请配置：热力图，行维度 type，列维度 age，指标 times，聚合 AVG，年龄范围 25~45，勾选类型 娱乐时事、政治时事，标题「娱乐与政治平均观看热力」，\n然后对照标准答案判分。",
+    "points": 8,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "E03",
+      "E18"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "dataset": {
+        "columns": [
+          "age",
+          "type",
+          "times"
+        ],
+        "rows": [
+          [
+            18,
+            "娱乐时事",
+            6
+          ],
+          [
+            18,
+            "政治时事",
+            2
+          ],
+          [
+            18,
+            "民生时事",
+            8
+          ],
+          [
+            18,
+            "民生时事",
+            3
+          ],
+          [
+            18,
+            "民生时事",
+            9
+          ],
+          [
+            19,
+            "娱乐时事",
+            9
+          ],
+          [
+            19,
+            "政治时事",
+            8
+          ],
+          [
+            19,
+            "民生时事",
+            6
+          ],
+          [
+            19,
+            "民生时事",
+            9
+          ],
+          [
+            20,
+            "娱乐时事",
+            1
+          ],
+          [
+            20,
+            "娱乐时事",
+            2
+          ],
+          [
+            20,
+            "政治时事",
+            8
+          ],
+          [
+            20,
+            "政治时事",
+            8
+          ],
+          [
+            20,
+            "民生时事",
+            3
+          ],
+          [
+            20,
+            "民生时事",
+            3
+          ],
+          [
+            21,
+            "娱乐时事",
+            9
+          ],
+          [
+            21,
+            "娱乐时事",
+            1
+          ],
+          [
+            21,
+            "政治时事",
+            1
+          ],
+          [
+            21,
+            "政治时事",
+            6
+          ],
+          [
+            21,
+            "民生时事",
+            2
+          ],
+          [
+            21,
+            "民生时事",
+            2
+          ],
+          [
+            21,
+            "民生时事",
+            1
+          ],
+          [
+            22,
+            "娱乐时事",
+            3
+          ],
+          [
+            22,
+            "娱乐时事",
+            7
+          ],
+          [
+            22,
+            "娱乐时事",
+            1
+          ],
+          [
+            22,
+            "政治时事",
+            1
+          ],
+          [
+            22,
+            "民生时事",
+            7
+          ],
+          [
+            22,
+            "民生时事",
+            6
+          ],
+          [
+            23,
+            "娱乐时事",
+            9
+          ],
+          [
+            23,
+            "娱乐时事",
+            7
+          ],
+          [
+            23,
+            "娱乐时事",
+            9
+          ],
+          [
+            23,
+            "政治时事",
+            8
+          ],
+          [
+            23,
+            "民生时事",
+            3
+          ],
+          [
+            23,
+            "民生时事",
+            4
+          ],
+          [
+            24,
+            "娱乐时事",
+            3
+          ],
+          [
+            24,
+            "政治时事",
+            2
+          ],
+          [
+            24,
+            "政治时事",
+            7
+          ],
+          [
+            24,
+            "政治时事",
+            4
+          ],
+          [
+            24,
+            "民生时事",
+            1
+          ],
+          [
+            24,
+            "民生时事",
+            6
+          ],
+          [
+            24,
+            "民生时事",
+            5
+          ],
+          [
+            25,
+            "娱乐时事",
+            1
+          ],
+          [
+            25,
+            "娱乐时事",
+            8
+          ],
+          [
+            25,
+            "政治时事",
+            8
+          ],
+          [
+            25,
+            "政治时事",
+            1
+          ],
+          [
+            25,
+            "政治时事",
+            3
+          ],
+          [
+            25,
+            "民生时事",
+            7
+          ],
+          [
+            25,
+            "民生时事",
+            2
+          ],
+          [
+            26,
+            "娱乐时事",
+            2
+          ],
+          [
+            26,
+            "娱乐时事",
+            1
+          ],
+          [
+            26,
+            "娱乐时事",
+            6
+          ],
+          [
+            26,
+            "政治时事",
+            3
+          ],
+          [
+            26,
+            "政治时事",
+            6
+          ],
+          [
+            26,
+            "政治时事",
+            2
+          ],
+          [
+            26,
+            "民生时事",
+            3
+          ],
+          [
+            27,
+            "娱乐时事",
+            4
+          ],
+          [
+            27,
+            "娱乐时事",
+            8
+          ],
+          [
+            27,
+            "政治时事",
+            2
+          ],
+          [
+            27,
+            "政治时事",
+            8
+          ],
+          [
+            27,
+            "民生时事",
+            1
+          ],
+          [
+            28,
+            "娱乐时事",
+            1
+          ],
+          [
+            28,
+            "娱乐时事",
+            3
+          ],
+          [
+            28,
+            "娱乐时事",
+            7
+          ],
+          [
+            28,
+            "政治时事",
+            4
+          ],
+          [
+            28,
+            "政治时事",
+            5
+          ],
+          [
+            28,
+            "政治时事",
+            7
+          ],
+          [
+            28,
+            "民生时事",
+            4
+          ],
+          [
+            28,
+            "民生时事",
+            2
+          ],
+          [
+            28,
+            "民生时事",
+            8
+          ],
+          [
+            29,
+            "娱乐时事",
+            6
+          ],
+          [
+            29,
+            "娱乐时事",
+            1
+          ],
+          [
+            29,
+            "娱乐时事",
+            9
+          ],
+          [
+            29,
+            "政治时事",
+            8
+          ],
+          [
+            29,
+            "政治时事",
+            5
+          ],
+          [
+            29,
+            "民生时事",
+            4
+          ],
+          [
+            29,
+            "民生时事",
+            8
+          ],
+          [
+            29,
+            "民生时事",
+            7
+          ],
+          [
+            30,
+            "娱乐时事",
+            4
+          ],
+          [
+            30,
+            "娱乐时事",
+            3
+          ],
+          [
+            30,
+            "政治时事",
+            4
+          ],
+          [
+            30,
+            "民生时事",
+            3
+          ],
+          [
+            30,
+            "民生时事",
+            5
+          ],
+          [
+            30,
+            "民生时事",
+            7
+          ],
+          [
+            31,
+            "娱乐时事",
+            9
+          ],
+          [
+            31,
+            "娱乐时事",
+            6
+          ],
+          [
+            31,
+            "娱乐时事",
+            5
+          ],
+          [
+            31,
+            "政治时事",
+            7
+          ],
+          [
+            31,
+            "民生时事",
+            8
+          ],
+          [
+            31,
+            "民生时事",
+            6
+          ],
+          [
+            32,
+            "娱乐时事",
+            1
+          ],
+          [
+            32,
+            "娱乐时事",
+            6
+          ],
+          [
+            32,
+            "政治时事",
+            4
+          ],
+          [
+            32,
+            "政治时事",
+            2
+          ],
+          [
+            32,
+            "民生时事",
+            2
+          ],
+          [
+            32,
+            "民生时事",
+            7
+          ],
+          [
+            33,
+            "娱乐时事",
+            8
+          ],
+          [
+            33,
+            "娱乐时事",
+            7
+          ],
+          [
+            33,
+            "政治时事",
+            9
+          ],
+          [
+            33,
+            "民生时事",
+            5
+          ],
+          [
+            33,
+            "民生时事",
+            7
+          ],
+          [
+            34,
+            "娱乐时事",
+            3
+          ],
+          [
+            34,
+            "娱乐时事",
+            7
+          ],
+          [
+            34,
+            "政治时事",
+            9
+          ],
+          [
+            34,
+            "政治时事",
+            3
+          ],
+          [
+            34,
+            "政治时事",
+            6
+          ],
+          [
+            34,
+            "民生时事",
+            8
+          ],
+          [
+            34,
+            "民生时事",
+            7
+          ],
+          [
+            34,
+            "民生时事",
+            2
+          ],
+          [
+            35,
+            "娱乐时事",
+            7
+          ],
+          [
+            35,
+            "娱乐时事",
+            5
+          ],
+          [
+            35,
+            "娱乐时事",
+            5
+          ],
+          [
+            35,
+            "政治时事",
+            4
+          ],
+          [
+            35,
+            "民生时事",
+            1
+          ],
+          [
+            35,
+            "民生时事",
+            2
+          ],
+          [
+            36,
+            "娱乐时事",
+            2
+          ],
+          [
+            36,
+            "政治时事",
+            1
+          ],
+          [
+            36,
+            "民生时事",
+            8
+          ],
+          [
+            36,
+            "民生时事",
+            3
+          ],
+          [
+            36,
+            "民生时事",
+            6
+          ],
+          [
+            37,
+            "娱乐时事",
+            5
+          ],
+          [
+            37,
+            "娱乐时事",
+            7
+          ],
+          [
+            37,
+            "政治时事",
+            1
+          ],
+          [
+            37,
+            "政治时事",
+            5
+          ],
+          [
+            37,
+            "政治时事",
+            3
+          ],
+          [
+            37,
+            "民生时事",
+            6
+          ],
+          [
+            38,
+            "娱乐时事",
+            7
+          ],
+          [
+            38,
+            "娱乐时事",
+            4
+          ],
+          [
+            38,
+            "娱乐时事",
+            3
+          ],
+          [
+            38,
+            "政治时事",
+            2
+          ],
+          [
+            38,
+            "政治时事",
+            8
+          ],
+          [
+            38,
+            "政治时事",
+            7
+          ],
+          [
+            38,
+            "民生时事",
+            1
+          ],
+          [
+            38,
+            "民生时事",
+            2
+          ],
+          [
+            39,
+            "娱乐时事",
+            3
+          ],
+          [
+            39,
+            "娱乐时事",
+            4
+          ],
+          [
+            39,
+            "政治时事",
+            9
+          ],
+          [
+            39,
+            "政治时事",
+            9
+          ],
+          [
+            39,
+            "政治时事",
+            2
+          ],
+          [
+            39,
+            "民生时事",
+            2
+          ],
+          [
+            39,
+            "民生时事",
+            5
+          ],
+          [
+            40,
+            "娱乐时事",
+            4
+          ],
+          [
+            40,
+            "政治时事",
+            8
+          ],
+          [
+            40,
+            "民生时事",
+            2
+          ],
+          [
+            41,
+            "娱乐时事",
+            7
+          ],
+          [
+            41,
+            "娱乐时事",
+            4
+          ],
+          [
+            41,
+            "政治时事",
+            7
+          ],
+          [
+            41,
+            "政治时事",
+            4
+          ],
+          [
+            41,
+            "民生时事",
+            5
+          ],
+          [
+            41,
+            "民生时事",
+            6
+          ],
+          [
+            42,
+            "娱乐时事",
+            4
+          ],
+          [
+            42,
+            "政治时事",
+            3
+          ],
+          [
+            42,
+            "政治时事",
+            9
+          ],
+          [
+            42,
+            "民生时事",
+            7
+          ],
+          [
+            42,
+            "民生时事",
+            4
+          ],
+          [
+            43,
+            "娱乐时事",
+            7
+          ],
+          [
+            43,
+            "娱乐时事",
+            3
+          ],
+          [
+            43,
+            "娱乐时事",
+            1
+          ],
+          [
+            43,
+            "政治时事",
+            1
+          ],
+          [
+            43,
+            "政治时事",
+            6
+          ],
+          [
+            43,
+            "政治时事",
+            2
+          ],
+          [
+            43,
+            "民生时事",
+            9
+          ],
+          [
+            44,
+            "娱乐时事",
+            6
+          ],
+          [
+            44,
+            "娱乐时事",
+            4
+          ],
+          [
+            44,
+            "政治时事",
+            4
+          ],
+          [
+            44,
+            "民生时事",
+            5
+          ],
+          [
+            44,
+            "民生时事",
+            6
+          ],
+          [
+            45,
+            "娱乐时事",
+            8
+          ],
+          [
+            45,
+            "政治时事",
+            6
+          ],
+          [
+            45,
+            "政治时事",
+            8
+          ],
+          [
+            45,
+            "政治时事",
+            2
+          ],
+          [
+            45,
+            "民生时事",
+            7
+          ],
+          [
+            45,
+            "民生时事",
+            4
+          ],
+          [
+            45,
+            "民生时事",
+            2
+          ],
+          [
+            46,
+            "娱乐时事",
+            8
+          ],
+          [
+            46,
+            "娱乐时事",
+            2
+          ],
+          [
+            46,
+            "娱乐时事",
+            9
+          ],
+          [
+            46,
+            "政治时事",
+            3
+          ],
+          [
+            46,
+            "政治时事",
+            2
+          ],
+          [
+            46,
+            "政治时事",
+            7
+          ],
+          [
+            46,
+            "民生时事",
+            9
+          ],
+          [
+            46,
+            "民生时事",
+            1
+          ],
+          [
+            46,
+            "民生时事",
+            2
+          ],
+          [
+            47,
+            "娱乐时事",
+            3
+          ],
+          [
+            47,
+            "娱乐时事",
+            9
+          ],
+          [
+            47,
+            "娱乐时事",
+            2
+          ],
+          [
+            47,
+            "政治时事",
+            4
+          ],
+          [
+            47,
+            "政治时事",
+            3
+          ],
+          [
+            47,
+            "政治时事",
+            8
+          ],
+          [
+            47,
+            "民生时事",
+            7
+          ],
+          [
+            47,
+            "民生时事",
+            1
+          ],
+          [
+            47,
+            "民生时事",
+            1
+          ],
+          [
+            48,
+            "娱乐时事",
+            7
+          ],
+          [
+            48,
+            "娱乐时事",
+            2
+          ],
+          [
+            48,
+            "娱乐时事",
+            1
+          ],
+          [
+            48,
+            "政治时事",
+            6
+          ],
+          [
+            48,
+            "政治时事",
+            7
+          ],
+          [
+            48,
+            "民生时事",
+            9
+          ],
+          [
+            49,
+            "娱乐时事",
+            9
+          ],
+          [
+            49,
+            "娱乐时事",
+            5
+          ],
+          [
+            49,
+            "政治时事",
+            8
+          ],
+          [
+            49,
+            "政治时事",
+            6
+          ],
+          [
+            49,
+            "民生时事",
+            3
+          ],
+          [
+            50,
+            "娱乐时事",
+            3
+          ],
+          [
+            50,
+            "娱乐时事",
+            7
+          ],
+          [
+            50,
+            "娱乐时事",
+            5
+          ],
+          [
+            50,
+            "政治时事",
+            5
+          ],
+          [
+            50,
+            "政治时事",
+            1
+          ],
+          [
+            50,
+            "政治时事",
+            6
+          ],
+          [
+            50,
+            "民生时事",
+            8
+          ]
+        ]
+      },
+      "target": {
+        "chartType": "heatmap",
+        "rowDim": "type",
+        "colDim": "age",
+        "metric": "times",
+        "agg": "avg",
+        "ageRange": [
+          25,
+          45
+        ],
+        "types": [
+          "娱乐时事",
+          "政治时事"
+        ],
+        "title": "娱乐与政治平均观看热力"
+      },
+      "expectedCells": [
+        {
+          "age": 25,
+          "type": "娱乐时事",
+          "value": 4.5
+        },
+        {
+          "age": 25,
+          "type": "政治时事",
+          "value": 4
+        },
+        {
+          "age": 26,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 26,
+          "type": "政治时事",
+          "value": 3.7
+        },
+        {
+          "age": 27,
+          "type": "娱乐时事",
+          "value": 6
+        },
+        {
+          "age": 27,
+          "type": "政治时事",
+          "value": 5
+        },
+        {
+          "age": 28,
+          "type": "娱乐时事",
+          "value": 3.7
+        },
+        {
+          "age": 28,
+          "type": "政治时事",
+          "value": 5.3
+        },
+        {
+          "age": 29,
+          "type": "娱乐时事",
+          "value": 5.3
+        },
+        {
+          "age": 29,
+          "type": "政治时事",
+          "value": 6.5
+        },
+        {
+          "age": 30,
+          "type": "娱乐时事",
+          "value": 3.5
+        },
+        {
+          "age": 30,
+          "type": "政治时事",
+          "value": 4
+        },
+        {
+          "age": 31,
+          "type": "娱乐时事",
+          "value": 6.7
+        },
+        {
+          "age": 31,
+          "type": "政治时事",
+          "value": 7
+        },
+        {
+          "age": 32,
+          "type": "娱乐时事",
+          "value": 3.5
+        },
+        {
+          "age": 32,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 33,
+          "type": "娱乐时事",
+          "value": 7.5
+        },
+        {
+          "age": 33,
+          "type": "政治时事",
+          "value": 9
+        },
+        {
+          "age": 34,
+          "type": "娱乐时事",
+          "value": 5
+        },
+        {
+          "age": 34,
+          "type": "政治时事",
+          "value": 6
+        },
+        {
+          "age": 35,
+          "type": "娱乐时事",
+          "value": 5.7
+        },
+        {
+          "age": 35,
+          "type": "政治时事",
+          "value": 4
+        },
+        {
+          "age": 36,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 36,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 37,
+          "type": "娱乐时事",
+          "value": 6
+        },
+        {
+          "age": 37,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 38,
+          "type": "娱乐时事",
+          "value": 4.7
+        },
+        {
+          "age": 38,
+          "type": "政治时事",
+          "value": 5.7
+        },
+        {
+          "age": 39,
+          "type": "娱乐时事",
+          "value": 3.5
+        },
+        {
+          "age": 39,
+          "type": "政治时事",
+          "value": 6.7
+        },
+        {
+          "age": 40,
+          "type": "娱乐时事",
+          "value": 4
+        },
+        {
+          "age": 40,
+          "type": "政治时事",
+          "value": 8
+        },
+        {
+          "age": 41,
+          "type": "娱乐时事",
+          "value": 5.5
+        },
+        {
+          "age": 41,
+          "type": "政治时事",
+          "value": 5.5
+        },
+        {
+          "age": 42,
+          "type": "娱乐时事",
+          "value": 4
+        },
+        {
+          "age": 42,
+          "type": "政治时事",
+          "value": 6
+        },
+        {
+          "age": 43,
+          "type": "娱乐时事",
+          "value": 3.7
+        },
+        {
+          "age": 43,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 44,
+          "type": "娱乐时事",
+          "value": 5
+        },
+        {
+          "age": 44,
+          "type": "政治时事",
+          "value": 4
+        },
+        {
+          "age": 45,
+          "type": "娱乐时事",
+          "value": 8
+        },
+        {
+          "age": 45,
+          "type": "政治时事",
+          "value": 5.3
+        }
+      ],
+      "referenceAnswer": "热力图适合观察两维度交叉的密度：行 type、列 age；AVG 结果四舍五入到 1 位小数。空组合在图中显示为 0。"
+    },
+    "referenceAnswer": "热力图适合观察两维度交叉的密度：行 type、列 age；AVG 结果四舍五入到 1 位小数。空组合在图中显示为 0。"
+  },
+  {
+    "key": "exp-chart-04",
+    "kind": "chart",
+    "category": "数字人专项",
+    "title": "图表：全年龄资讯类型观看占比（饼图）",
+    "prompt": "运营会前需要一张「全部年龄段、三个类型」的记录条数占比饼图。\n请配置：饼图，行维度 type，列维度 age，指标 times，聚合 COUNT，年龄范围 18~50，勾选全部三个类型，标题「资讯类型观看占比」，\n然后对照标准答案判分。",
+    "points": 8,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "G15",
+      "C13"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "dataset": {
+        "columns": [
+          "age",
+          "type",
+          "times"
+        ],
+        "rows": [
+          [
+            18,
+            "娱乐时事",
+            9
+          ],
+          [
+            18,
+            "政治时事",
+            9
+          ],
+          [
+            18,
+            "政治时事",
+            5
+          ],
+          [
+            18,
+            "民生时事",
+            7
+          ],
+          [
+            19,
+            "娱乐时事",
+            4
+          ],
+          [
+            19,
+            "政治时事",
+            1
+          ],
+          [
+            19,
+            "民生时事",
+            5
+          ],
+          [
+            19,
+            "民生时事",
+            8
+          ],
+          [
+            20,
+            "娱乐时事",
+            4
+          ],
+          [
+            20,
+            "娱乐时事",
+            8
+          ],
+          [
+            20,
+            "政治时事",
+            1
+          ],
+          [
+            20,
+            "政治时事",
+            5
+          ],
+          [
+            20,
+            "政治时事",
+            8
+          ],
+          [
+            20,
+            "民生时事",
+            3
+          ],
+          [
+            21,
+            "娱乐时事",
+            8
+          ],
+          [
+            21,
+            "娱乐时事",
+            6
+          ],
+          [
+            21,
+            "政治时事",
+            6
+          ],
+          [
+            21,
+            "民生时事",
+            3
+          ],
+          [
+            21,
+            "民生时事",
+            9
+          ],
+          [
+            21,
+            "民生时事",
+            3
+          ],
+          [
+            22,
+            "娱乐时事",
+            2
+          ],
+          [
+            22,
+            "政治时事",
+            3
+          ],
+          [
+            22,
+            "政治时事",
+            8
+          ],
+          [
+            22,
+            "民生时事",
+            1
+          ],
+          [
+            23,
+            "娱乐时事",
+            1
+          ],
+          [
+            23,
+            "政治时事",
+            8
+          ],
+          [
+            23,
+            "政治时事",
+            1
+          ],
+          [
+            23,
+            "政治时事",
+            1
+          ],
+          [
+            23,
+            "民生时事",
+            5
+          ],
+          [
+            24,
+            "娱乐时事",
+            3
+          ],
+          [
+            24,
+            "政治时事",
+            6
+          ],
+          [
+            24,
+            "政治时事",
+            9
+          ],
+          [
+            24,
+            "政治时事",
+            3
+          ],
+          [
+            24,
+            "民生时事",
+            5
+          ],
+          [
+            24,
+            "民生时事",
+            4
+          ],
+          [
+            24,
+            "民生时事",
+            1
+          ],
+          [
+            25,
+            "娱乐时事",
+            6
+          ],
+          [
+            25,
+            "政治时事",
+            8
+          ],
+          [
+            25,
+            "政治时事",
+            4
+          ],
+          [
+            25,
+            "政治时事",
+            7
+          ],
+          [
+            25,
+            "民生时事",
+            1
+          ],
+          [
+            25,
+            "民生时事",
+            9
+          ],
+          [
+            26,
+            "娱乐时事",
+            1
+          ],
+          [
+            26,
+            "娱乐时事",
+            9
+          ],
+          [
+            26,
+            "政治时事",
+            8
+          ],
+          [
+            26,
+            "政治时事",
+            2
+          ],
+          [
+            26,
+            "民生时事",
+            7
+          ],
+          [
+            27,
+            "娱乐时事",
+            3
+          ],
+          [
+            27,
+            "政治时事",
+            9
+          ],
+          [
+            27,
+            "民生时事",
+            7
+          ],
+          [
+            27,
+            "民生时事",
+            4
+          ],
+          [
+            28,
+            "娱乐时事",
+            6
+          ],
+          [
+            28,
+            "娱乐时事",
+            7
+          ],
+          [
+            28,
+            "政治时事",
+            3
+          ],
+          [
+            28,
+            "政治时事",
+            3
+          ],
+          [
+            28,
+            "政治时事",
+            2
+          ],
+          [
+            28,
+            "民生时事",
+            5
+          ],
+          [
+            29,
+            "娱乐时事",
+            9
+          ],
+          [
+            29,
+            "娱乐时事",
+            9
+          ],
+          [
+            29,
+            "政治时事",
+            6
+          ],
+          [
+            29,
+            "民生时事",
+            4
+          ],
+          [
+            29,
+            "民生时事",
+            8
+          ],
+          [
+            29,
+            "民生时事",
+            9
+          ],
+          [
+            30,
+            "娱乐时事",
+            1
+          ],
+          [
+            30,
+            "娱乐时事",
+            3
+          ],
+          [
+            30,
+            "娱乐时事",
+            8
+          ],
+          [
+            30,
+            "政治时事",
+            4
+          ],
+          [
+            30,
+            "政治时事",
+            6
+          ],
+          [
+            30,
+            "民生时事",
+            8
+          ],
+          [
+            30,
+            "民生时事",
+            9
+          ],
+          [
+            30,
+            "民生时事",
+            1
+          ],
+          [
+            31,
+            "娱乐时事",
+            9
+          ],
+          [
+            31,
+            "娱乐时事",
+            1
+          ],
+          [
+            31,
+            "娱乐时事",
+            8
+          ],
+          [
+            31,
+            "政治时事",
+            9
+          ],
+          [
+            31,
+            "民生时事",
+            9
+          ],
+          [
+            31,
+            "民生时事",
+            4
+          ],
+          [
+            32,
+            "娱乐时事",
+            8
+          ],
+          [
+            32,
+            "娱乐时事",
+            6
+          ],
+          [
+            32,
+            "娱乐时事",
+            5
+          ],
+          [
+            32,
+            "政治时事",
+            1
+          ],
+          [
+            32,
+            "民生时事",
+            2
+          ],
+          [
+            32,
+            "民生时事",
+            2
+          ],
+          [
+            32,
+            "民生时事",
+            6
+          ],
+          [
+            33,
+            "娱乐时事",
+            3
+          ],
+          [
+            33,
+            "娱乐时事",
+            7
+          ],
+          [
+            33,
+            "政治时事",
+            1
+          ],
+          [
+            33,
+            "政治时事",
+            8
+          ],
+          [
+            33,
+            "政治时事",
+            9
+          ],
+          [
+            33,
+            "民生时事",
+            3
+          ],
+          [
+            33,
+            "民生时事",
+            7
+          ],
+          [
+            34,
+            "娱乐时事",
+            6
+          ],
+          [
+            34,
+            "娱乐时事",
+            4
+          ],
+          [
+            34,
+            "政治时事",
+            1
+          ],
+          [
+            34,
+            "民生时事",
+            1
+          ],
+          [
+            34,
+            "民生时事",
+            3
+          ],
+          [
+            35,
+            "娱乐时事",
+            5
+          ],
+          [
+            35,
+            "政治时事",
+            3
+          ],
+          [
+            35,
+            "政治时事",
+            9
+          ],
+          [
+            35,
+            "民生时事",
+            9
+          ],
+          [
+            36,
+            "娱乐时事",
+            6
+          ],
+          [
+            36,
+            "娱乐时事",
+            5
+          ],
+          [
+            36,
+            "娱乐时事",
+            5
+          ],
+          [
+            36,
+            "政治时事",
+            6
+          ],
+          [
+            36,
+            "政治时事",
+            4
+          ],
+          [
+            36,
+            "民生时事",
+            6
+          ],
+          [
+            37,
+            "娱乐时事",
+            8
+          ],
+          [
+            37,
+            "娱乐时事",
+            8
+          ],
+          [
+            37,
+            "娱乐时事",
+            6
+          ],
+          [
+            37,
+            "政治时事",
+            7
+          ],
+          [
+            37,
+            "民生时事",
+            3
+          ],
+          [
+            37,
+            "民生时事",
+            7
+          ],
+          [
+            37,
+            "民生时事",
+            9
+          ],
+          [
+            38,
+            "娱乐时事",
+            3
+          ],
+          [
+            38,
+            "娱乐时事",
+            3
+          ],
+          [
+            38,
+            "娱乐时事",
+            4
+          ],
+          [
+            38,
+            "政治时事",
+            5
+          ],
+          [
+            38,
+            "政治时事",
+            1
+          ],
+          [
+            38,
+            "政治时事",
+            6
+          ],
+          [
+            38,
+            "民生时事",
+            3
+          ],
+          [
+            38,
+            "民生时事",
+            3
+          ],
+          [
+            38,
+            "民生时事",
+            7
+          ],
+          [
+            39,
+            "娱乐时事",
+            1
+          ],
+          [
+            39,
+            "娱乐时事",
+            6
+          ],
+          [
+            39,
+            "政治时事",
+            5
+          ],
+          [
+            39,
+            "政治时事",
+            9
+          ],
+          [
+            39,
+            "民生时事",
+            9
+          ],
+          [
+            40,
+            "娱乐时事",
+            2
+          ],
+          [
+            40,
+            "政治时事",
+            5
+          ],
+          [
+            40,
+            "政治时事",
+            8
+          ],
+          [
+            40,
+            "政治时事",
+            6
+          ],
+          [
+            40,
+            "民生时事",
+            7
+          ],
+          [
+            40,
+            "民生时事",
+            6
+          ],
+          [
+            41,
+            "娱乐时事",
+            2
+          ],
+          [
+            41,
+            "娱乐时事",
+            4
+          ],
+          [
+            41,
+            "政治时事",
+            5
+          ],
+          [
+            41,
+            "民生时事",
+            8
+          ],
+          [
+            42,
+            "娱乐时事",
+            6
+          ],
+          [
+            42,
+            "政治时事",
+            8
+          ],
+          [
+            42,
+            "政治时事",
+            8
+          ],
+          [
+            42,
+            "政治时事",
+            4
+          ],
+          [
+            42,
+            "民生时事",
+            5
+          ],
+          [
+            42,
+            "民生时事",
+            2
+          ],
+          [
+            43,
+            "娱乐时事",
+            9
+          ],
+          [
+            43,
+            "政治时事",
+            5
+          ],
+          [
+            43,
+            "政治时事",
+            6
+          ],
+          [
+            43,
+            "民生时事",
+            5
+          ],
+          [
+            43,
+            "民生时事",
+            8
+          ],
+          [
+            43,
+            "民生时事",
+            7
+          ],
+          [
+            44,
+            "娱乐时事",
+            1
+          ],
+          [
+            44,
+            "政治时事",
+            4
+          ],
+          [
+            44,
+            "民生时事",
+            2
+          ],
+          [
+            44,
+            "民生时事",
+            3
+          ],
+          [
+            44,
+            "民生时事",
+            3
+          ],
+          [
+            45,
+            "娱乐时事",
+            3
+          ],
+          [
+            45,
+            "娱乐时事",
+            2
+          ],
+          [
+            45,
+            "娱乐时事",
+            3
+          ],
+          [
+            45,
+            "政治时事",
+            7
+          ],
+          [
+            45,
+            "政治时事",
+            4
+          ],
+          [
+            45,
+            "政治时事",
+            4
+          ],
+          [
+            45,
+            "民生时事",
+            5
+          ],
+          [
+            46,
+            "娱乐时事",
+            5
+          ],
+          [
+            46,
+            "政治时事",
+            9
+          ],
+          [
+            46,
+            "政治时事",
+            6
+          ],
+          [
+            46,
+            "政治时事",
+            9
+          ],
+          [
+            46,
+            "民生时事",
+            1
+          ],
+          [
+            46,
+            "民生时事",
+            2
+          ],
+          [
+            46,
+            "民生时事",
+            5
+          ],
+          [
+            47,
+            "娱乐时事",
+            1
+          ],
+          [
+            47,
+            "政治时事",
+            7
+          ],
+          [
+            47,
+            "民生时事",
+            2
+          ],
+          [
+            47,
+            "民生时事",
+            7
+          ],
+          [
+            47,
+            "民生时事",
+            2
+          ],
+          [
+            48,
+            "娱乐时事",
+            8
+          ],
+          [
+            48,
+            "政治时事",
+            4
+          ],
+          [
+            48,
+            "民生时事",
+            6
+          ],
+          [
+            48,
+            "民生时事",
+            4
+          ],
+          [
+            49,
+            "娱乐时事",
+            6
+          ],
+          [
+            49,
+            "娱乐时事",
+            5
+          ],
+          [
+            49,
+            "娱乐时事",
+            4
+          ],
+          [
+            49,
+            "政治时事",
+            2
+          ],
+          [
+            49,
+            "政治时事",
+            7
+          ],
+          [
+            49,
+            "民生时事",
+            8
+          ],
+          [
+            50,
+            "娱乐时事",
+            7
+          ],
+          [
+            50,
+            "政治时事",
+            1
+          ],
+          [
+            50,
+            "政治时事",
+            6
+          ],
+          [
+            50,
+            "政治时事",
+            7
+          ],
+          [
+            50,
+            "民生时事",
+            2
+          ],
+          [
+            50,
+            "民生时事",
+            8
+          ],
+          [
+            50,
+            "民生时事",
+            3
+          ]
+        ]
+      },
+      "target": {
+        "chartType": "pie",
+        "rowDim": "type",
+        "colDim": "age",
+        "metric": "times",
+        "agg": "count",
+        "ageRange": [
+          18,
+          50
+        ],
+        "types": [
+          "娱乐时事",
+          "政治时事",
+          "民生时事"
+        ],
+        "title": "资讯类型观看占比"
+      },
+      "expectedCells": [
+        {
+          "age": 18,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 18,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 18,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 19,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 19,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 19,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 20,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 20,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 20,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 21,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 21,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 21,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 22,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 22,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 22,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 23,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 23,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 23,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 24,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 24,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 24,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 25,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 25,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 25,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 26,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 26,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 26,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 27,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 27,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 27,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 28,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 28,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 28,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 29,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 29,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 29,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 30,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 30,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 30,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 31,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 31,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 31,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 32,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 32,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 32,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 33,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 33,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 33,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 34,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 34,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 34,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 35,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 35,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 35,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 36,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 36,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 36,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 37,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 37,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 37,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 38,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 38,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 38,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 39,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 39,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 39,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 40,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 40,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 40,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 41,
+          "type": "娱乐时事",
+          "value": 2
+        },
+        {
+          "age": 41,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 41,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 42,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 42,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 42,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 43,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 43,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 43,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 44,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 44,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 44,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 45,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 45,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 45,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 46,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 46,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 46,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 47,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 47,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 47,
+          "type": "民生时事",
+          "value": 3
+        },
+        {
+          "age": 48,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 48,
+          "type": "政治时事",
+          "value": 1
+        },
+        {
+          "age": 48,
+          "type": "民生时事",
+          "value": 2
+        },
+        {
+          "age": 49,
+          "type": "娱乐时事",
+          "value": 3
+        },
+        {
+          "age": 49,
+          "type": "政治时事",
+          "value": 2
+        },
+        {
+          "age": 49,
+          "type": "民生时事",
+          "value": 1
+        },
+        {
+          "age": 50,
+          "type": "娱乐时事",
+          "value": 1
+        },
+        {
+          "age": 50,
+          "type": "政治时事",
+          "value": 3
+        },
+        {
+          "age": 50,
+          "type": "民生时事",
+          "value": 3
+        }
+      ],
+      "referenceAnswer": "饼图按行维度（type）聚合占比；COUNT 统计记录条数。数据范围要覆盖 18~50 全年龄段，缺一个类型占比就错。"
+    },
+    "referenceAnswer": "饼图按行维度（type）聚合占比；COUNT 统计记录条数。数据范围要覆盖 18~50 全年龄段，缺一个类型占比就错。"
+  },
+  {
+    "key": "exp-flow-01",
+    "kind": "flow",
+    "category": "智能系统设计",
+    "title": "流程设计：数字人客服上线前验收流程",
+    "prompt": "以下是数字人客服上线前的验收流程骨架，请为三个判定节点选择正确的条件，构成可上线的最短验收路径。\n注意：判「否」的分支会进入补救动作并重新判定，不是直接跳过。",
+    "points": 6,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "E06",
+      "G20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "nodes": [
+        {
+          "id": "start",
+          "kind": "start",
+          "label": "开始"
+        },
+        {
+          "id": "a1",
+          "kind": "action",
+          "label": "采集并整理领域语料"
+        },
+        {
+          "id": "j1",
+          "kind": "judge",
+          "label": "知识库覆盖足够？",
+          "blank": 0
+        },
+        {
+          "id": "a2",
+          "kind": "action",
+          "label": "补充领域语料"
+        },
+        {
+          "id": "a3",
+          "kind": "action",
+          "label": "接入语音合成与口型驱动"
+        },
+        {
+          "id": "j2",
+          "kind": "judge",
+          "label": "端到端时延达标？",
+          "blank": 1
+        },
+        {
+          "id": "a4",
+          "kind": "action",
+          "label": "优化推理与缓存"
+        },
+        {
+          "id": "a5",
+          "kind": "action",
+          "label": "小流量灰度发布"
+        },
+        {
+          "id": "j3",
+          "kind": "judge",
+          "label": "灰度质量达标？",
+          "blank": 2
+        },
+        {
+          "id": "a6",
+          "kind": "action",
+          "label": "回滚版本并复盘"
+        },
+        {
+          "id": "end",
+          "kind": "end",
+          "label": "正式上线"
+        }
+      ],
+      "edges": [
+        [
+          "start",
+          "a1"
+        ],
+        [
+          "a1",
+          "j1"
+        ],
+        [
+          "j1",
+          "a3",
+          "是"
+        ],
+        [
+          "j1",
+          "a2",
+          "否"
+        ],
+        [
+          "a2",
+          "j1"
+        ],
+        [
+          "a3",
+          "j2"
+        ],
+        [
+          "j2",
+          "a5",
+          "是"
+        ],
+        [
+          "j2",
+          "a4",
+          "否"
+        ],
+        [
+          "a4",
+          "j2"
+        ],
+        [
+          "a5",
+          "j3"
+        ],
+        [
+          "j3",
+          "end",
+          "是"
+        ],
+        [
+          "j3",
+          "a6",
+          "否"
+        ],
+        [
+          "a6",
+          "end"
+        ]
+      ],
+      "choices": [
+        "知识库覆盖率 ≥ 95%",
+        "端到端响应时延 ≤ 2 秒",
+        "灰度期间投诉率 < 1%"
+      ],
+      "answers": [
+        "知识库覆盖率 ≥ 95%",
+        "端到端响应时延 ≤ 2 秒",
+        "灰度期间投诉率 < 1%"
+      ],
+      "referenceAnswer": "验收顺序：先保证知识覆盖（语料充足）→ 再验证端到端时延（交互体验）→ 最后灰度看投诉率（真实质量）。三个判定都不达标时进入对应补救动作并重新判定，只有全部通过才正式上线；灰度不达标先回滚复盘而不是带伤上线。"
+    },
+    "referenceAnswer": "验收顺序：先保证知识覆盖（语料充足）→ 再验证端到端时延（交互体验）→ 最后灰度看投诉率（真实质量）。三个判定都不达标时进入对应补救动作并重新判定，只有全部通过才正式上线；灰度不达标先回滚复盘而不是带伤上线。"
+  },
+  {
+    "key": "exp-flow-02",
+    "kind": "flow",
+    "category": "业务分析",
+    "title": "流程设计：业务数据采集流程",
+    "prompt": "为「新增业务指标看板」设计数据采集流程：请为两个判定节点选择正确条件。\n现有埋点已覆盖指标时无需新增埋点，直接进入质量校验；校验不通过要修复管道后重新校验。",
+    "points": 4,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C01",
+      "C02"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "nodes": [
+        {
+          "id": "start",
+          "kind": "start",
+          "label": "开始"
+        },
+        {
+          "id": "a1",
+          "kind": "action",
+          "label": "明确业务指标与口径"
+        },
+        {
+          "id": "j1",
+          "kind": "judge",
+          "label": "埋点是否已覆盖？",
+          "blank": 0
+        },
+        {
+          "id": "a3",
+          "kind": "action",
+          "label": "设计并新增埋点"
+        },
+        {
+          "id": "j2",
+          "kind": "judge",
+          "label": "数据质量校验通过？",
+          "blank": 1
+        },
+        {
+          "id": "a4",
+          "kind": "action",
+          "label": "修复采集管道"
+        },
+        {
+          "id": "a5",
+          "kind": "action",
+          "label": "数据入仓并建立看板"
+        },
+        {
+          "id": "end",
+          "kind": "end",
+          "label": "结束"
+        }
+      ],
+      "edges": [
+        [
+          "start",
+          "a1"
+        ],
+        [
+          "a1",
+          "j1"
+        ],
+        [
+          "j1",
+          "j2",
+          "是"
+        ],
+        [
+          "j1",
+          "a3",
+          "否"
+        ],
+        [
+          "a3",
+          "j2"
+        ],
+        [
+          "j2",
+          "a5",
+          "是"
+        ],
+        [
+          "j2",
+          "a4",
+          "否"
+        ],
+        [
+          "a4",
+          "j2"
+        ],
+        [
+          "a5",
+          "end"
+        ]
+      ],
+      "choices": [
+        "现有埋点已覆盖所需指标",
+        "抽样字段完整率 ≥ 99%"
+      ],
+      "answers": [
+        "现有埋点已覆盖所需指标",
+        "抽样字段完整率 ≥ 99%"
+      ],
+      "referenceAnswer": "先定口径再谈采集：已覆盖则复用现有埋点，未覆盖先补埋点；无论新旧数据都必须过质量校验（完整率 ≥ 99%），不通过就修复管道并重新校验，避免脏数据入仓。"
+    },
+    "referenceAnswer": "先定口径再谈采集：已覆盖则复用现有埋点，未覆盖先补埋点；无论新旧数据都必须过质量校验（完整率 ≥ 99%），不通过就修复管道并重新校验，避免脏数据入仓。"
+  },
+  {
+    "key": "exp-flow-03",
+    "kind": "flow",
+    "category": "智能系统设计",
+    "title": "流程设计：数字人应答异常人工接管",
+    "prompt": "数字人在直播中回答用户提问，低置信度或用户不满意时都要能转人工。请为两个判定节点选择正确条件。",
+    "points": 4,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "E17"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "nodes": [
+        {
+          "id": "start",
+          "kind": "start",
+          "label": "收到用户提问"
+        },
+        {
+          "id": "j1",
+          "kind": "judge",
+          "label": "模型置信度是否足够？",
+          "blank": 0
+        },
+        {
+          "id": "a1",
+          "kind": "action",
+          "label": "数字人生成并播报答案"
+        },
+        {
+          "id": "j2",
+          "kind": "judge",
+          "label": "用户确认已解决？",
+          "blank": 1
+        },
+        {
+          "id": "a2",
+          "kind": "action",
+          "label": "转人工并携带对话上下文"
+        },
+        {
+          "id": "a3",
+          "kind": "action",
+          "label": "记录负样本进入标注队列"
+        },
+        {
+          "id": "end",
+          "kind": "end",
+          "label": "会话结束"
+        }
+      ],
+      "edges": [
+        [
+          "start",
+          "j1"
+        ],
+        [
+          "j1",
+          "a1",
+          "是"
+        ],
+        [
+          "j1",
+          "a2",
+          "否"
+        ],
+        [
+          "a1",
+          "j2"
+        ],
+        [
+          "j2",
+          "end",
+          "是"
+        ],
+        [
+          "j2",
+          "a2",
+          "否"
+        ],
+        [
+          "a2",
+          "a3"
+        ],
+        [
+          "a3",
+          "end"
+        ]
+      ],
+      "choices": [
+        "模型输出置信度 ≥ 0.8",
+        "用户明确表示问题已解决"
+      ],
+      "answers": [
+        "模型输出置信度 ≥ 0.8",
+        "用户明确表示问题已解决"
+      ],
+      "referenceAnswer": "置信度低于阈值直接转人工，避免胡说；高置信度播报后仍要确认解决，用户否定同样转人工。每次人工接管都应沉淀负样本进入标注队列，形成数据闭环。"
+    },
+    "referenceAnswer": "置信度低于阈值直接转人工，避免胡说；高置信度播报后仍要确认解决，用户否定同样转人工。每次人工接管都应沉淀负样本进入标注队列，形成数据闭环。"
+  },
+  {
+    "key": "exp-flow-04",
+    "kind": "flow",
+    "category": "数字人专项",
+    "title": "流程设计：数字人短视频制作流程",
+    "prompt": "这是数字人短视频的制作流程：脚本要先过合规审查，成片前要核对口型同步质量。请为两个判定节点选择正确条件。",
+    "points": 4,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "G13",
+      "G07"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "nodes": [
+        {
+          "id": "start",
+          "kind": "start",
+          "label": "开始"
+        },
+        {
+          "id": "a1",
+          "kind": "action",
+          "label": "撰写短视频脚本"
+        },
+        {
+          "id": "j1",
+          "kind": "judge",
+          "label": "脚本是否合规？",
+          "blank": 0
+        },
+        {
+          "id": "a2",
+          "kind": "action",
+          "label": "按审核意见修改脚本"
+        },
+        {
+          "id": "a3",
+          "kind": "action",
+          "label": "数字人形象与语音合成"
+        },
+        {
+          "id": "j2",
+          "kind": "judge",
+          "label": "口型同步是否达标？",
+          "blank": 1
+        },
+        {
+          "id": "a4",
+          "kind": "action",
+          "label": "调整音画参数并重渲染"
+        },
+        {
+          "id": "a5",
+          "kind": "action",
+          "label": "导出成片并发布"
+        },
+        {
+          "id": "end",
+          "kind": "end",
+          "label": "结束"
+        }
+      ],
+      "edges": [
+        [
+          "start",
+          "a1"
+        ],
+        [
+          "a1",
+          "j1"
+        ],
+        [
+          "j1",
+          "a3",
+          "是"
+        ],
+        [
+          "j1",
+          "a2",
+          "否"
+        ],
+        [
+          "a2",
+          "j1"
+        ],
+        [
+          "a3",
+          "j2"
+        ],
+        [
+          "j2",
+          "a5",
+          "是"
+        ],
+        [
+          "j2",
+          "a4",
+          "否"
+        ],
+        [
+          "a4",
+          "j2"
+        ],
+        [
+          "a5",
+          "end"
+        ]
+      ],
+      "choices": [
+        "脚本通过平台合规审查",
+        "口型同步误差 ≤ 80ms"
+      ],
+      "answers": [
+        "脚本通过平台合规审查",
+        "口型同步误差 ≤ 80ms"
+      ],
+      "referenceAnswer": "合规是内容生产的第一道闸门，未过审必须修改后重新送审；口型同步误差直接影响观感可信度，超阈值要调整音画参数重渲染，两关都过才能发布。"
+    },
+    "referenceAnswer": "合规是内容生产的第一道闸门，未过审必须修改后重新送审；口型同步误差直接影响观感可信度，超阈值要调整音画参数重渲染，两关都过才能发布。"
+  },
+  {
+    "key": "exp-essay-01",
+    "kind": "essay",
+    "category": "职业道德与基础知识",
+    "title": "方案题：客户数据用于模型训练的合规处理",
+    "prompt": "客户提供了 5000 条含手机号与购买记录的业务数据，要求你方训练一个推荐模型。请给出一份数据处理与训练的合规方案（300 字以上），说明：哪些数据要处理、如何处理、训练与交付各阶段要注意什么。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "A08",
+      "A16"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "最小必要与授权",
+          "points": 30,
+          "desc": "只使用与训练目标相关的字段，明确获得客户授权与使用范围约定"
+        },
+        {
+          "label": "去标识化处理",
+          "points": 30,
+          "desc": "手机号等直接标识符脱敏/哈希，说明不可逆处理或密钥管理"
+        },
+        {
+          "label": "过程可追溯",
+          "points": 20,
+          "desc": "数据使用记录、版本与血缘可查，交付后按约定删除或返还"
+        },
+        {
+          "label": "风险与兜底",
+          "points": 20,
+          "desc": "说明泄漏应急、模型记忆风险（如测试集隔离）与验收口径"
+        }
+      ],
+      "referenceAnswer": "要点：① 与客户签订数据处理协议，明确用途、期限与删除义务，坚持最小必要，只取推荐所需字段；② 手机号做哈希/截断等不可逆脱敏，购买记录做类别化处理；③ 建立数据台账（来源、授权、版本），训练/验证/测试严格分离防止记忆泄漏；④ 交付时删除原始数据并出具销毁证明，约定泄漏应急与责任条款。"
+    },
+    "referenceAnswer": "要点：① 与客户签订数据处理协议，明确用途、期限与删除义务，坚持最小必要，只取推荐所需字段；② 手机号做哈希/截断等不可逆脱敏，购买记录做类别化处理；③ 建立数据台账（来源、授权、版本），训练/验证/测试严格分离防止记忆泄漏；④ 交付时删除原始数据并出具销毁证明，约定泄漏应急与责任条款。"
+  },
+  {
+    "key": "exp-essay-02",
+    "kind": "essay",
+    "category": "数据处理与标注",
+    "title": "方案题：标注质量抽检不合格的纠错方案",
+    "prompt": "你负责的语料标注项目抽检合格率 82%（要求 ≥ 95%）。请写一份纠错与改进方案（300 字以上），包含：问题定位、纠错流程、防再发措施与验收安排。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "B15",
+      "B20"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "问题定位",
+          "points": 30,
+          "desc": "按标注员/标签类型/错误模式分层统计，找到主要错误来源"
+        },
+        {
+          "label": "纠错流程",
+          "points": 30,
+          "desc": "全量复查范围、仲裁机制（双人背靠背+第三方裁定）、错误回流修正"
+        },
+        {
+          "label": "防再发",
+          "points": 20,
+          "desc": "修订标注规范并培训、新增易错样例、上线前试标校准"
+        },
+        {
+          "label": "验收安排",
+          "points": 20,
+          "desc": "重新抽检方案与合格率门槛、里程碑与责任到人"
+        }
+      ],
+      "referenceAnswer": "要点：① 先分层定位：按标注员、标签、批次统计错误率，区分「理解偏差」与「规范漏洞」；② 对高错率批次全量复核，双人背靠背标注 + 仲裁裁定，修正结果回流数据集；③ 修订标注规范附正反例，组织再培训并做小批量试标验证；④ 重新按分层抽样验收，合格率达标（≥95%）后再进入下一批次，过程记录留档。"
+    },
+    "referenceAnswer": "要点：① 先分层定位：按标注员、标签、批次统计错误率，区分「理解偏差」与「规范漏洞」；② 对高错率批次全量复核，双人背靠背标注 + 仲裁裁定，修正结果回流数据集；③ 修订标注规范附正反例，组织再培训并做小批量试标验证；④ 重新按分层抽样验收，合格率达标（≥95%）后再进入下一批次，过程记录留档。"
+  },
+  {
+    "key": "exp-essay-03",
+    "kind": "essay",
+    "category": "业务分析",
+    "title": "方案题：智能客服满意度下降的优化方案",
+    "prompt": "某数字人客服近一个月满意度从 92% 降到 80%，转人工率上升到 35%。请写一份分析优化方案（300 字以上），说明如何定位原因、设计优化措施并验证效果。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "C05",
+      "C06"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "数据定位",
+          "points": 30,
+          "desc": "按问题类型/时间/渠道拆解指标，结合对话日志找出主要失分场景"
+        },
+        {
+          "label": "根因分析",
+          "points": 25,
+          "desc": "区分知识库过时、意图识别退化、业务变更等候选根因并验证"
+        },
+        {
+          "label": "优化措施",
+          "points": 25,
+          "desc": "针对根因的知识更新、话术优化、阈值与人工接管策略调整"
+        },
+        {
+          "label": "效果验证",
+          "points": 20,
+          "desc": "A/B 或灰度对比、指标回访（满意度/转人工率）与监控看板"
+        }
+      ],
+      "referenceAnswer": "要点：① 先拆指标：按问题类型、时段、渠道下钻，找出转人工与差评集中的 Top 场景；② 抽样对话日志做根因归类（知识缺失/回答错误/答非所问），并结合当月业务变更（如新活动）验证假设；③ 措施对应根因：补知识库、改写失败话术、调低置信度阈值加强人工兜底；④ 灰度发布对比新旧版本满意度与转人工率，达标后全量并建立日级监控。"
+    },
+    "referenceAnswer": "要点：① 先拆指标：按问题类型、时段、渠道下钻，找出转人工与差评集中的 Top 场景；② 抽样对话日志做根因归类（知识缺失/回答错误/答非所问），并结合当月业务变更（如新活动）验证假设；③ 措施对应根因：补知识库、改写失败话术、调低置信度阈值加强人工兜底；④ 灰度发布对比新旧版本满意度与转人工率，达标后全量并建立日级监控。"
+  },
+  {
+    "key": "exp-essay-04",
+    "kind": "essay",
+    "category": "智能训练",
+    "title": "方案题：识别模型错例分析与纠正",
+    "prompt": "你们训练的意图识别模型在测试集上整体准确率 90%，但「退款咨询」类只有 61%。请写一份错例分析与纠正报告框架（300 字以上），包含错例收集、归因、数据与模型两侧的纠正手段、回归验证。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "D07",
+      "D06"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "错例收集与分层",
+          "points": 30,
+          "desc": "汇总该类别全部错例，按预测成什么类/句式/长度分层统计"
+        },
+        {
+          "label": "归因分析",
+          "points": 25,
+          "desc": "区分标注噪声、样本不足、类间混淆、分布偏移等根因"
+        },
+        {
+          "label": "纠正措施",
+          "points": 25,
+          "desc": "数据侧（补样、清洗、难例加权）与模型侧（阈值、损失、结构）分别给出"
+        },
+        {
+          "label": "回归验证",
+          "points": 20,
+          "desc": "固定评测集对比前后指标，确认无其他类别回退"
+        }
+      ],
+      "referenceAnswer": "要点：① 导出「退款咨询」全部错例，统计误判去向与句式特征（如夹带方言、长短句）；② 人工复核该类标注是否本身有噪声，检查训练样本量与类间边界（退款 vs 物流）；③ 数据侧补充难例并清洗噪声，模型侧可调分类阈值或引入类加权损失；④ 用固定测试集回归，目标该类 F1 提升且其他类别不掉点，报告记录前后对比。"
+    },
+    "referenceAnswer": "要点：① 导出「退款咨询」全部错例，统计误判去向与句式特征（如夹带方言、长短句）；② 人工复核该类标注是否本身有噪声，检查训练样本量与类间边界（退款 vs 物流）；③ 数据侧补充难例并清洗噪声，模型侧可调分类阈值或引入类加权损失；④ 用固定测试集回归，目标该类 F1 提升且其他类别不掉点，报告记录前后对比。"
+  },
+  {
+    "key": "exp-essay-05",
+    "kind": "essay",
+    "category": "智能系统设计",
+    "title": "方案题：把业务诉求转化为智能解决方案",
+    "prompt": "门店巡检团队提出诉求：希望能自动检查货架陈列是否符合标准。请写一份智能解决方案设计（300 字以上），从方案选型、功能需求、数据与迭代计划四个方面展开。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "E02",
+      "E12"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "方案选型",
+          "points": 25,
+          "desc": "比较纯人工/规则/视觉模型方案，给出选型理由与成本收益"
+        },
+        {
+          "label": "功能需求",
+          "points": 25,
+          "desc": "拆解为可执行功能点（拍照采集、检测识别、告警与报表）与优先级"
+        },
+        {
+          "label": "数据计划",
+          "points": 25,
+          "desc": "样本采集规范、标注标准、冷启动与持续回流机制"
+        },
+        {
+          "label": "迭代计划",
+          "points": 25,
+          "desc": "试点-评估-扩量的里程碑与验收指标（准确率、覆盖率）"
+        }
+      ],
+      "referenceAnswer": "要点：① 选型对比：人工巡检成本高、纯规则难覆盖摆放多样性，选用目标检测/分类视觉模型 + 规则兜底；② 功能拆解：巡检拍照 App、SKU 识别与陈列判断、不合格告警、周报看板，按 MVP 优先级排期；③ 数据：制定拍摄角度/光照规范与标注标准，首批覆盖头部 SKU，后续badcase 回流再训练；④ 试点 3 家门店验证准确率 ≥ 90% 后分批扩量，验收看检出率与误报率。"
+    },
+    "referenceAnswer": "要点：① 选型对比：人工巡检成本高、纯规则难覆盖摆放多样性，选用目标检测/分类视觉模型 + 规则兜底；② 功能拆解：巡检拍照 App、SKU 识别与陈列判断、不合格告警、周报看板，按 MVP 优先级排期；③ 数据：制定拍摄角度/光照规范与标注标准，首批覆盖头部 SKU，后续badcase 回流再训练；④ 试点 3 家门店验证准确率 ≥ 90% 后分批扩量，验收看检出率与误报率。"
+  },
+  {
+    "key": "exp-essay-06",
+    "kind": "essay",
+    "category": "培训与指导",
+    "title": "讲义题：新任标注员上岗培训讲义大纲",
+    "prompt": "请为即将上岗的数据标注新人编写一份 2 课时的培训讲义大纲（300 字以上），主题为「文本意图标注规范与常见错误」，包含教学目标、课时安排、核心内容与考核方式。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "F01",
+      "F04"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "教学目标",
+          "points": 20,
+          "desc": "目标可衡量（如独立完成试标且与专家一致率 ≥ 90%）"
+        },
+        {
+          "label": "内容结构",
+          "points": 30,
+          "desc": "覆盖标注体系、规范条文、正反例对照、易错点与工具操作"
+        },
+        {
+          "label": "课时安排",
+          "points": 25,
+          "desc": "讲授/练习/答疑时间分配合理，练习占比足够"
+        },
+        {
+          "label": "考核方式",
+          "points": 25,
+          "desc": "试标考核与合格线、不合格补训闭环"
+        }
+      ],
+      "referenceAnswer": "要点：目标定为「理解意图标签体系，独立完成试标且与专家一致率 ≥ 90%」；内容按「标签体系 → 规范条文逐条讲解 → 正反例对照练习 → 高频错误复盘 → 工具实操」展开；第 1 课时讲授+示例，第 2 课时实标 30 条+讲评；考核用 50 条盲标题，一致率 ≥ 90% 通过，未通过者结对补训一周后复考。"
+    },
+    "referenceAnswer": "要点：目标定为「理解意图标签体系，独立完成试标且与专家一致率 ≥ 90%」；内容按「标签体系 → 规范条文逐条讲解 → 正反例对照练习 → 高频错误复盘 → 工具实操」展开；第 1 课时讲授+示例，第 2 课时实标 30 条+讲评；考核用 50 条盲标题，一致率 ≥ 90% 通过，未通过者结对补训一周后复考。"
+  },
+  {
+    "key": "exp-essay-07",
+    "kind": "essay",
+    "category": "培训与指导",
+    "title": "方案题：团队季度进阶培训计划",
+    "prompt": "你带的标注团队 8 人已能熟练完成基础标注，下季度将承接视觉框选与质检复核两类新任务。请写一份季度进阶培训计划（300 字以上），包含能力差距分析、培训内容与形式、效果评估。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "F05",
+      "F06"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "差距分析",
+          "points": 25,
+          "desc": "基于现有能力与新任务要求做差距矩阵，明确培训对象分层"
+        },
+        {
+          "label": "内容设计",
+          "points": 30,
+          "desc": "按新任务分别设计课程与实练，含规范、工具与案例"
+        },
+        {
+          "label": "形式安排",
+          "points": 20,
+          "desc": "讲授/结对/试标/复盘结合，进度安排可行"
+        },
+        {
+          "label": "效果评估",
+          "points": 25,
+          "desc": "过程指标与结果指标（一致率、效率）双维度评估并闭环"
+        }
+      ],
+      "referenceAnswer": "要点：① 用「任务要求 × 现有技能」矩阵找出两项新任务的差距人头，分为快慢两组；② 视觉框选课程覆盖框选规范、边界样例、工具快捷键；质检复核课程覆盖抽检策略、仲裁流程、错误反馈话术；③ 每周半天集中培训 + 结对实标，双周复盘错例；④ 评估看试标一致率、返工率与人均效率，未达标者延长结对周期，达标者进入正式排产。"
+    },
+    "referenceAnswer": "要点：① 用「任务要求 × 现有技能」矩阵找出两项新任务的差距人头，分为快慢两组；② 视觉框选课程覆盖框选规范、边界样例、工具快捷键；质检复核课程覆盖抽检策略、仲裁流程、错误反馈话术；③ 每周半天集中培训 + 结对实标，双周复盘错例；④ 评估看试标一致率、返工率与人均效率，未达标者延长结对周期，达标者进入正式排产。"
+  },
+  {
+    "key": "exp-essay-08",
+    "kind": "essay",
+    "category": "数字人专项",
+    "title": "方案题：金融数字人幻觉治理方案",
+    "prompt": "某银行要上线一个面向客户的金融数字人，合规要求极高，任何「编造产品收益率」「承诺保本」的回答都不可接受。请写一份幻觉治理方案（300 字以上），覆盖知识库建设、生成控制、上线评估与持续监控。",
+    "points": 10,
+    "source": "考纲扩充·原创练习",
+    "topic_keys": [
+      "G16",
+      "G04"
+    ],
+    "source_ids": [
+      "REPO"
+    ],
+    "review_status": "authored",
+    "meta": {
+      "rubric": [
+        {
+          "label": "知识库治理",
+          "points": 30,
+          "desc": "权威来源准入、分块与更新机制、时效冲突处理"
+        },
+        {
+          "label": "生成侧控制",
+          "points": 30,
+          "desc": "检索增强（回答限定知识库）、话术白名单、拒答与转人工策略"
+        },
+        {
+          "label": "上线评估",
+          "points": 20,
+          "desc": "构建黄金问答集评估幻觉率，红队测试敏感问题"
+        },
+        {
+          "label": "持续监控",
+          "points": 20,
+          "desc": "线上抽检、badcase 回流、版本回滚机制"
+        }
+      ],
+      "referenceAnswer": "要点：① 知识库只准入官方权威来源，建立分块索引与版本更新流程，产品条款变更时旧内容即时下线；② 生成侧用检索增强限定回答范围，收益率等敏感字段用模板白名单输出，知识库覆盖不到时明确拒答并转人工，绝不允许自由发挥；③ 上线前构建覆盖高频业务的黄金问答集，幻觉率需低于约定阈值，并对承诺保本、夸收益等敏感问题做红队测试；④ 上线后按日抽检会话、badcase 回流标注与知识库，保留一键回滚能力。"
+    },
+    "referenceAnswer": "要点：① 知识库只准入官方权威来源，建立分块索引与版本更新流程，产品条款变更时旧内容即时下线；② 生成侧用检索增强限定回答范围，收益率等敏感字段用模板白名单输出，知识库覆盖不到时明确拒答并转人工，绝不允许自由发挥；③ 上线前构建覆盖高频业务的黄金问答集，幻觉率需低于约定阈值，并对承诺保本、夸收益等敏感问题做红队测试；④ 上线后按日抽检会话、badcase 回流标注与知识库，保留一键回滚能力。"
+  }
+]
