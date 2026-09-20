@@ -1,82 +1,39 @@
 #!/usr/bin/env node
-// 初始化/重建题库：node scripts/seed.mjs
+// Incremental seed, with snapshot backup and stable IDs; never resets learning history.
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
+import { loadContent, PROJECT_ROOT } from './lib/content.mjs';
+import { validateContent } from './lib/validate-content.mjs';
+import { importContent, backupDatabase } from './lib/seed-store.mjs';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-mkdirSync(DATA_DIR, { recursive: true });
-const db = new DatabaseSync(path.join(DATA_DIR, 'cognilab.db'));
-
-const SCHEMA = `
-CREATE TABLE IF NOT EXISTS questions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  type TEXT NOT NULL, module TEXT NOT NULL, stem TEXT NOT NULL,
-  options TEXT NOT NULL, answer TEXT NOT NULL, explanation TEXT DEFAULT '',
-  difficulty INTEGER DEFAULT 2, source TEXT DEFAULT '',
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS tasks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  kind TEXT NOT NULL, title TEXT NOT NULL, category TEXT NOT NULL,
-  prompt TEXT NOT NULL, points INTEGER DEFAULT 10, source TEXT DEFAULT '', meta TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS settings (
-  key TEXT PRIMARY KEY, value TEXT NOT NULL,
-  updated_at TEXT DEFAULT (datetime('now','localtime'))
-);
-CREATE TABLE IF NOT EXISTS syllabus (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  module TEXT NOT NULL, section TEXT NOT NULL, topic TEXT NOT NULL,
-  detail TEXT DEFAULT '', level TEXT DEFAULT '', ref TEXT DEFAULT '',
-  mastered INTEGER DEFAULT 0, sort INTEGER DEFAULT 0,
-  UNIQUE(module, section, topic)
-);
-CREATE TABLE IF NOT EXISTS lessons (
-  topic_id INTEGER PRIMARY KEY,
-  content TEXT, anim_html TEXT,
-  created_at TEXT DEFAULT (datetime('now','localtime'))
-);
-`;
-
-db.exec(SCHEMA);
-// 旧库迁移：补充 level / ref 列
-{
-  const cols = db.prepare('PRAGMA table_info(syllabus)').all().map((c) => c.name);
-  if (cols.length && !cols.includes('level')) db.exec("ALTER TABLE syllabus ADD COLUMN level TEXT DEFAULT ''");
-  if (cols.length && !cols.includes('ref')) db.exec("ALTER TABLE syllabus ADD COLUMN ref TEXT DEFAULT ''");
-}
-
-const questions = JSON.parse(readFileSync(path.join(DATA_DIR, 'seed-questions.json'), 'utf-8'));
-const tasks = JSON.parse(readFileSync(path.join(DATA_DIR, 'seed-tasks.json'), 'utf-8'));
-const syllabus = JSON.parse(readFileSync(path.join(DATA_DIR, 'seed-syllabus.json'), 'utf-8'));
-
-db.exec('DELETE FROM questions');
-db.exec('DELETE FROM tasks');
-db.exec("DELETE FROM sqlite_sequence WHERE name IN ('questions','tasks')");
-const iq = db.prepare(
-  'INSERT INTO questions (type,module,stem,options,answer,explanation,difficulty,source) VALUES (?,?,?,?,?,?,?,?)',
-);
-for (const q of questions) {
-  iq.run(q.type, q.module, q.stem, JSON.stringify(q.options), q.answer, q.explanation, q.difficulty, q.source);
-}
-const it = db.prepare(
-  'INSERT INTO tasks (kind,title,category,prompt,points,source,meta) VALUES (?,?,?,?,?,?,?)',
-);
-for (const t of tasks) {
-  it.run(t.kind, t.title, t.category, t.prompt, t.points, t.source, JSON.stringify(t.meta));
-}
-// 考纲：增量合并（保留用户编辑与掌握状态），移除已不在种子中的条目
-const isyl = db.prepare(
-  'INSERT INTO syllabus (module,section,topic,detail,level,ref,sort) VALUES (?,?,?,?,?,?,?) ON CONFLICT(module,section,topic) DO UPDATE SET detail = excluded.detail, level = excluded.level, ref = excluded.ref',
-);
-syllabus.forEach((s, i) => isyl.run(s.module, s.section, s.topic, s.detail, s.level ?? '', s.ref ?? '', i));
-const keepKeys = syllabus.map((s) => [s.module, s.section, s.topic]);
-const existing = db.prepare('SELECT id, module, section, topic FROM syllabus').all();
-const del = db.prepare('DELETE FROM syllabus WHERE id = ?');
-for (const row of existing) {
-  if (!keepKeys.some(([m, sec, t]) => m === row.module && sec === row.section && t === row.topic)) {
-    del.run(row.id);
+let db;
+try {
+  const args = process.argv.slice(2);
+  let database = path.join(PROJECT_ROOT, 'data/cognilab.db'), dryRun = false;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--dry-run') dryRun = true;
+    else if (args[i] === '--database' && args[i + 1] && !args[i + 1].startsWith('--')) database = path.resolve(args[++i]);
+    else throw new Error(`未知参数或缺少参数值: ${args[i]}`);
   }
-}
-console.log(`✓ 题库已灌入：${questions.length} 道题，${tasks.length} 个实操任务，${syllabus.length} 个考纲知识点`);
+  const content = loadContent();
+  const report = validateContent(content);
+  if (!report.ok) throw new Error(report.errors.join('\n'));
+  console.log(`内容校验通过: 总计${content.questions.length}题、${content.tasks.length}实操、${content.syllabus.length}考点；其中新增242题/32实操。`);
+  if (dryRun) {
+    console.log('仅验证内容；未打开数据库，也未预测真实迁移冲突。');
+  } else {
+    const existed = existsSync(database);
+    mkdirSync(path.dirname(database), { recursive: true });
+    db = new DatabaseSync(database);
+    db.exec('PRAGMA busy_timeout = 5000');
+    if (existed) console.log(`数据库一致性备份: ${backupDatabase(db, path.join(path.dirname(database), 'backups'))}`);
+    const result = importContent(db, content);
+    console.log(JSON.stringify(result, null, 2));
+    if (result.conflicts.length) console.warn('存在内容冲突，已保留用户编辑；请核对上面的稳定键和字段。');
+    console.log('增量导入完成：原ID、作答/错题/考试历史、自定义条目和掌握状态均不重置。');
+  }
+  for (const warning of report.warnings) console.warn(warning);
+} catch (error) {
+  console.error(`导入未完成: ${error.message}`); process.exitCode = 1;
+} finally { db?.close(); }

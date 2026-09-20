@@ -1,0 +1,111 @@
+[
+  {
+    "id": "REPO",
+    "title": "仓库既有考纲、考点种子和样题转录",
+    "kind": "repository",
+    "paths": [
+      "docs/04-考试大纲与考点清单.md",
+      "data/seed-syllabus.json",
+      "data/seed-questions.json",
+      "data/seed-tasks.json"
+    ],
+    "verification": "已读取仓库文本与代码；并未完成三个PDF原件的逐页复核",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "NOTICE",
+    "title": "赛项通知原件",
+    "kind": "pdf",
+    "path": "docs/01-赛项通知-人工智能数字人训练师.pdf",
+    "git_blob_sha": "8152fb3882c1042a15eba56eabdf8702c47e02fc",
+    "verification": "下载与二进制解析受限，未完成原文核验"
+  },
+  {
+    "id": "SAMPLE",
+    "title": "官方样题原件（仓库命名）",
+    "kind": "pdf",
+    "path": "docs/02-官方样题-人工智能数字人训练师赛项.pdf",
+    "git_blob_sha": "514fb38149cb05597a8e1252c3ffddf6213eb357",
+    "verification": "依据仓库现有转录保留题号和答案；未完成PDF逐题比对"
+  },
+  {
+    "id": "STANDARD",
+    "title": "人工智能训练师国家职业技能标准2021版",
+    "kind": "pdf",
+    "path": "docs/03-命题依据-人工智能训练师国家职业技能标准2021版.pdf",
+    "git_blob_sha": "0e7df192c8c004baf09fd34078c8bcd139e3604f",
+    "verification": "已确认仓库文件及条目映射；仅取得部分二进制片段，未完成原文解码核验"
+  },
+  {
+    "id": "KERAS",
+    "title": "Keras Model training APIs",
+    "kind": "documentation",
+    "urls": [
+      "https://keras.io/api/models/model_training_apis/"
+    ],
+    "verification": "官方文档已在线核验evaluate返回值、metrics与return_dict",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "PANDAS",
+    "title": "pandas missing data / duplicates APIs",
+    "kind": "documentation",
+    "urls": [
+      "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html",
+      "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.drop_duplicates.html"
+    ],
+    "verification": "官方文档已核验；实操参考解另有本地执行验证",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "SKLEARN",
+    "title": "scikit-learn evaluation and preprocessing",
+    "kind": "documentation",
+    "urls": [
+      "https://scikit-learn.org/stable/common_pitfalls.html",
+      "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html"
+    ],
+    "verification": "官方文档已核验防泄漏和逻辑回归接口；指标与划分另有本地执行验证",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "SQLITE",
+    "title": "SQLite SELECT",
+    "kind": "documentation",
+    "urls": [
+      "https://www.sqlite.org/lang_select.html"
+    ],
+    "verification": "官方文档已核验；SQL参考解另有本地SQLite执行验证",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "WAV2LIP",
+    "title": "A Lip Sync Expert Is All You Need for Speech to Lip Generation In The Wild",
+    "kind": "paper",
+    "urls": [
+      "https://arxiv.org/abs/2008.10010"
+    ],
+    "verification": "已核对论文摘要，支持由目标语音驱动口型同步的路线；未对其产品性能作保证",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "NRCVAD",
+    "title": "Obtaining Reliable Human Ratings of Valence, Arousal, and Dominance for 20,000 English Words",
+    "kind": "paper",
+    "urls": [
+      "https://aclanthology.org/P18-1017/"
+    ],
+    "verification": "已核对ACL出版页的VAD三维术语",
+    "date": "2026-09-19"
+  },
+  {
+    "id": "RVAD",
+    "title": "rVAD: An Unsupervised Segment-Based Robust Voice Activity Detection Method",
+    "kind": "paper",
+    "urls": [
+      "https://arxiv.org/abs/1906.03588"
+    ],
+    "verification": "已核对论文摘要中Voice Activity Detection的含义",
+    "date": "2026-09-19"
+  }
+]

@@ -16,7 +16,7 @@ export type TaskKind = 'sql' | 'python' | 'essay' | 'chart' | 'flow';
 
 export interface Checkpoint {
   label: string;
-  code: string; // python assert 代码
+  code: string; // Trusted authored checking code, not a security sandbox.
   points: number;
 }
 
@@ -29,22 +29,33 @@ export interface Task {
   points: number;
   source: string;
   meta: {
-    // sql
     initSql?: string;
     expectedSql?: string;
-    // python
-    preload?: string; // csv 内容
+    expectedColumns?: string[];
+    expectedRows?: (string | number | null)[][];
+    negativeSql?: string;
+    rowOrderMatters?: boolean;
+    columnOrderMatters?: boolean;
+    preload?: string;
+    starter?: string;
+    referenceCode?: string;
+    negativeCode?: string;
     checkpoints?: Checkpoint[];
-    // essay
+    referenceAnswer?: string;
     rubric?: { label: string; points: number; desc: string }[];
-    // chart
     dataset?: { columns: string[]; rows: (string | number)[][] };
     target?: Record<string, unknown>;
-    // flow
+    expectedCells?: { age: number; type: string; value: number }[];
     nodes?: { id: string; kind: 'start' | 'end' | 'action' | 'judge'; label: string; blank?: number }[];
-    edges?: [string, string][];
+    edges?: [string, string, string?][];
     choices?: string[];
-    answers?: string[]; // answers[blankIndex] = choice text
+    answers?: string[];
+    content?: {
+      key: string;
+      topic_keys: string[];
+      source_ids: string[];
+      review_status: string;
+    };
   };
 }
 
