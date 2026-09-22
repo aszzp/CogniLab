@@ -43,7 +43,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   // 考试中不下发答案
   return NextResponse.json({
     finished: false,
-    questions: questions.map(({ answer, explanation, ...rest }) => ({ ...rest, answer: '', explanation: '' })),
+    questions: questions.map((q) => ({ ...q, answer: '', explanation: '' })),
     plan: { sec: exam.duration_sec },
   });
 }

@@ -9,8 +9,8 @@ export async function POST(req: Request) {
   if (save) {
     const list = questions as GenQ[];
     if (!Array.isArray(list) || !list.length) return NextResponse.json({ error: '无题目可入库' }, { status: 400 });
-    const module = list[0].module ?? '数字人';
-    const n = insertQuestions(list, module);
+    const moduleName = list[0].module ?? '数字人';
+    const n = insertQuestions(list, moduleName);
     return NextResponse.json({ saved: n });
   }
 

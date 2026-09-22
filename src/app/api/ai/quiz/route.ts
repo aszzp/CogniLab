@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { qRun } from '@/lib/db';
-import { chat, extractJson } from '@/lib/ai';
+import { chat } from '@/lib/ai';
 
 interface GenQ {
   type: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Bot, X, Send, Loader2, Wrench, Quote } from 'lucide-react';
 import Markdown from '../Markdown';
 import { useKun } from './kun-context';
@@ -13,24 +13,39 @@ interface Msg {
 }
 
 const STORE_KEY = 'kun_chat_v1';
+const EMPTY_MSGS: Msg[] = [];
+
+// 聊天记录做成组件外的小型外部存储：读写与 localStorage 持久化都在事件路径完成，
+// 组件经 useSyncExternalStore 订阅；水合期间回退空列表，避免在 effect 里 setState。
+let storeMsgs: Msg[] = EMPTY_MSGS;
+const storeListeners = new Set<() => void>();
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved) storeMsgs = JSON.parse(saved).slice(-40);
+  } catch { /* ignore */ }
+}
+const subscribeMsgs = (callback: () => void) => {
+  storeListeners.add(callback);
+  return () => { storeListeners.delete(callback); };
+};
+const getMsgs = () => storeMsgs;
+const getServerMsgs = () => EMPTY_MSGS;
+function setMsgs(next: Msg[] | ((prev: Msg[]) => Msg[])) {
+  storeMsgs = typeof next === 'function' ? next(storeMsgs) : next;
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(storeMsgs.slice(-40)));
+  } catch { /* ignore */ }
+  for (const listener of storeListeners) listener();
+}
 
 export default function KunChat({ askText, askSeq }: { askText: string; askSeq: number }) {
   const { open, setOpen, quote, setQuote } = useKun();
-  const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const msgs = useSyncExternalStore(subscribeMsgs, getMsgs, getServerMsgs);
   const lastSeq = useRef(askSeq);
   const listRef = useRef<HTMLDivElement>(null);
-  const bootstrapped = useRef(false);
-
-  useEffect(() => {
-    if (bootstrapped.current) return;
-    bootstrapped.current = true;
-    try {
-      const saved = localStorage.getItem(STORE_KEY);
-      if (saved) setMsgs(JSON.parse(saved).slice(-40));
-    } catch { /* ignore */ }
-  }, []);
 
   useEffect(() => {
     if (askSeq !== lastSeq.current && askText) {
@@ -41,9 +56,6 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
   }, [askSeq, askText]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(msgs.slice(-40)));
-    } catch { /* ignore */ }
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [msgs, loading]);
 

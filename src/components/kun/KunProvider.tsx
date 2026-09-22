@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import KunChat from './KunChat';
 import { Ctx } from './kun-context';
 
@@ -9,12 +9,12 @@ export default function KunProvider({ children }: { children: React.ReactNode })
   const [quote, setQuote] = useState('');
   const [askText, setAskText] = useState('');
   const [sel, setSel] = useState<{ text: string; x: number; y: number } | null>(null);
-  const askSeq = useRef(0);
+  const [askSeq, setAskSeq] = useState(0);
 
   const ask = useCallback((text: string) => {
     setQuote('');
     setAskText(text);
-    askSeq.current += 1;
+    setAskSeq((s) => s + 1);
     setOpen(true);
   }, []);
 
@@ -70,7 +70,7 @@ export default function KunProvider({ children }: { children: React.ReactNode })
           ✨ 问坤哥
         </button>
       )}
-      <KunChat askText={askText} askSeq={askSeq.current} />
+      <KunChat askText={askText} askSeq={askSeq} />
     </Ctx.Provider>
   );
 }

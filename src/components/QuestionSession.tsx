@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Check, X, ChevronLeft, ChevronRight, Flag, Home } from 'lucide-react';
 import AIExplain from './AIExplain';
@@ -14,6 +14,7 @@ interface Result {
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const norm = (s: string) => String(s || '').split('').sort().join('');
+const nowMs = () => Date.now();
 
 export default function QuestionSession({
   questions,
@@ -29,7 +30,10 @@ export default function QuestionSession({
   const [locked, setLocked] = useState(false);
   const [results, setResults] = useState<Record<number, Result>>({});
   const [finished, setFinished] = useState(false);
-  const tRef = useRef(Date.now());
+  const tRef = useRef(0);
+  useEffect(() => {
+    tRef.current = nowMs();
+  }, []);
   const q = questions[idx];
 
   const done = useMemo(() => Object.keys(results).length, [results]);
@@ -41,7 +45,7 @@ export default function QuestionSession({
   function judge(ans: string) {
     if (locked) return;
     const correct = norm(ans) === norm(q.answer);
-    const timeMs = Date.now() - tRef.current;
+    const timeMs = nowMs() - tRef.current;
     setResults((r) => ({ ...r, [q.id]: { correct, picked: ans, timeMs } }));
     setLocked(true);
     fetch('/api/attempts', {
@@ -69,7 +73,7 @@ export default function QuestionSession({
     setIdx(idx + 1);
     setPicked([]);
     setLocked(false);
-    tRef.current = Date.now();
+    tRef.current = nowMs();
   }
 
   function prev() {

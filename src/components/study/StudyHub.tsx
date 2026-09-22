@@ -208,7 +208,7 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
                                   {selecting ? (
                                     <button onClick={() => setSelected((s) => {
                                       const n = new Set(s);
-                                      n.has(it.id) ? n.delete(it.id) : n.add(it.id);
+                                      if (n.has(it.id)) n.delete(it.id); else n.add(it.id);
                                       return n;
                                     })}
                                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${selected.has(it.id) ? 'border-violet-400 bg-violet-500 text-white' : 'border-white/25'}`}>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { notFound } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Grid3x3, Send, Check, X } from 'lucide-react';
 import AIExplain from './AIExplain';
 import type { Question } from '@/lib/types';
@@ -37,6 +36,14 @@ export default function ExamRunner({
   const q = questions[idx];
   const answeredCount = Object.keys(answers).length;
 
+  // 翻题时重置当前题的已选项：渲染期间检测 idx 变化并同步状态（React 官方模式）
+  const [prevIdx, setPrevIdx] = useState(idx);
+  if (prevIdx !== idx) {
+    setPrevIdx(idx);
+    const id = questions[idx]?.id;
+    setPicked(answers[id] ? answers[id].split('') : []);
+  }
+
   useEffect(() => {
     if (result) return;
     const t = setInterval(() => {
@@ -52,10 +59,6 @@ export default function ExamRunner({
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
-
-  useEffect(() => {
-    setPicked(answers[q?.id] ? answers[q.id].split('') : []);
-  }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function record(ans: string) {
     setAnswers((a) => ({ ...a, [q.id]: ans }));
