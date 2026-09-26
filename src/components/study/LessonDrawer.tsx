@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { X, BookOpen, Play, RotateCw, Sparkles, Loader2, CircleDot, CheckCircle2, CircleCheckBig } from 'lucide-react';
+import { X, BookOpen, Play, RotateCw, Sparkles, Loader2, CircleDot, CheckCircle2, CircleCheckBig, Zap } from 'lucide-react';
 import Markdown from '../Markdown';
 import type { SyllabusItem } from '@/app/study/page';
 
@@ -33,19 +33,31 @@ export default function LessonDrawer({
   const [animState, setAnimState] = useState<'none' | 'loading' | 'ready'>('none');
   const [playKey, setPlayKey] = useState(0);
   const [quiz, setQuiz] = useState<GenQ[] | null>(null);
+  const [quizCached, setQuizCached] = useState(false);
   const [quizState, setQuizState] = useState<'none' | 'loading' | 'saved'>('none');
-  const started = useRef(false);
+  const started = useRef<number | null>(null);
 
-  // 打开时：取缓存或流式生成讲解；取动画缓存
+  // 打开（或切换知识点）时：命中缓存直接秒出（不走流式），仅缺失时流式生成讲解
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
+    if (started.current === topic.id) return;
+    started.current = topic.id;
+    setContent('');
+    setAnimHtml('');
+    setAnimState('none');
+    setQuiz(null);
+    setQuizCached(false);
+    setQuizState('none');
+    setTab('lesson');
     (async () => {
       try {
         const cache = await (await fetch(`/api/study/lesson?topicId=${topic.id}`)).json();
         if (cache.animHtml) {
           setAnimHtml(cache.animHtml);
           setAnimState('ready');
+        }
+        if (cache.quiz?.length) {
+          setQuiz(cache.quiz);
+          setQuizCached(true);
         }
         if (cache.content) {
           setContent(cache.content);
@@ -58,7 +70,12 @@ export default function LessonDrawer({
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ topicId: topic.id }),
         });
-        const reader = res.body!.getReader();
+        if (!res.ok || !res.body) {
+          const data = await res.json().catch(() => ({}));
+          setContent('⚠️ ' + (data.error || '讲解生成失败，请重试'));
+          return;
+        }
+        const reader = res.body.getReader();
         const dec = new TextDecoder();
         for (;;) {
           const { done, value } = await reader.read();
@@ -98,6 +115,7 @@ export default function LessonDrawer({
   async function genQuiz() {
     setQuizState('loading');
     setQuiz(null);
+    setQuizCached(false);
     try {
       const res = await fetch('/api/study/quiz', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -106,6 +124,8 @@ export default function LessonDrawer({
       const data = await res.json();
       if (data.questions) setQuiz(data.questions);
       else alert(data.error || '生成失败');
+    } catch {
+      alert('生成失败，请重试');
     } finally {
       setQuizState('none');
     }
@@ -124,9 +144,9 @@ export default function LessonDrawer({
   const MIcon = MASTER_ICON[topic.mastered];
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm md:p-6" onClick={onClose}>
       <div
-        className="max-h-[86dvh] overflow-y-auto rounded-t-3xl border-t border-white/12 bg-[#0b0b13]/98 md:mx-auto md:w-[560px] md:rounded-3xl md:border"
+        className="drawer-in max-h-[86dvh] w-full max-w-[560px] overflow-y-auto rounded-3xl border border-white/12 bg-[#0b0b13]/98"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 头部 */}
@@ -244,6 +264,11 @@ export default function LessonDrawer({
               )}
               {quiz && (
                 <div className="space-y-2.5">
+                  {quizCached && (
+                    <p className="flex items-center gap-1.5 text-[11.5px] text-cyan-300/90">
+                      <Zap size={12} /> 已预生成，直接查看
+                    </p>
+                  )}
                   {quiz.map((q, i) => (
                     <div key={i} className="rounded-xl bg-white/[0.03] p-3 text-[12.5px]">
                       <p className="text-zinc-200">

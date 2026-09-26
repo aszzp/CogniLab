@@ -101,6 +101,10 @@ function migrate(d: DatabaseSync) {
   if (cols.length && !cols.some((c) => c.name === 'ref')) {
     d.exec("ALTER TABLE syllabus ADD COLUMN ref TEXT DEFAULT ''");
   }
+  const lessonCols = d.prepare('PRAGMA table_info(lessons)').all() as { name: string }[];
+  if (lessonCols.length && !lessonCols.some((c) => c.name === 'quiz_json')) {
+    d.exec('ALTER TABLE lessons ADD COLUMN quiz_json TEXT');
+  }
 }
 
 const g = globalThis as unknown as { __cognilab_db?: DatabaseSync };

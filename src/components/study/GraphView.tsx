@@ -35,20 +35,23 @@ export default function GraphView({
   const [activeSection, setActiveSection] = useState<{ module: string; section: string } | null>(null);
 
   const layout = useMemo(() => {
+    // 服务端与浏览器 Math.cos/sin 可能差最后几位浮点数，导致水合不匹配；
+    // 坐标统一保留 2 位小数保证两端渲染一致
+    const r2 = (v: number) => Math.round(v * 100) / 100;
     const modules = MODULE_ORDER.filter((m) => items.some((x) => x.module === m)).map((m, i, arr) => {
       const angle = (-90 + (360 / arr.length) * i) * (Math.PI / 180);
       const secs = [...new Set(items.filter((x) => x.module === m).map((x) => x.section))];
       const spread = (58 * (Math.PI / 180));
       const sectionNodes = secs.map((sec, j) => {
         const a = secs.length === 1 ? angle : angle - spread / 2 + (spread / (secs.length - 1)) * j;
-        return { sec, x: Math.cos(a) * 235, y: Math.sin(a) * 235 };
+        return { sec, x: r2(Math.cos(a) * 235), y: r2(Math.sin(a) * 235) };
       });
       const list = items.filter((x) => x.module === m);
       return {
         name: m,
         color: MODULE_COLOR[m] ?? '#8b5cf6',
-        x: Math.cos(angle) * 118,
-        y: Math.sin(angle) * 118,
+        x: r2(Math.cos(angle) * 118),
+        y: r2(Math.sin(angle) * 118),
         sections: sectionNodes,
         mastered: list.filter((x) => x.mastered === 2).length,
         total: list.length,

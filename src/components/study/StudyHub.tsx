@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Network, ListChecks, Plus, Trash2, Loader2, Sparkles, BookOpen, CircleDot, CheckCircle2, CircleCheckBig, ChevronDown } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Network, ListChecks, Plus, Trash2, Loader2, Sparkles, BookOpen, CircleDot, CheckCircle2, CircleCheckBig, ChevronDown, Zap, Square } from 'lucide-react';
 import GraphView from './GraphView';
 import LessonDrawer from './LessonDrawer';
 import type { SyllabusItem } from '@/app/study/page';
@@ -19,6 +19,15 @@ const MASTER_ICON = [CircleDot, CheckCircle2, CircleCheckBig];
 const MASTER_CLS = ['text-zinc-600', 'text-cyan-300', 'text-emerald-400'];
 const MASTER_LABEL = ['未学', '已学', '掌握'];
 
+interface PregenInfo {
+  running: boolean;
+  phase: string;
+  done: number;
+  total: number;
+  current: string;
+  failed: { topic: string; kind: string; error: string }[];
+}
+
 export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) {
   const [items, setItems] = useState(initial);
   const [view, setView] = useState<'graph' | 'list'>('graph');
@@ -30,6 +39,58 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
   const [genState, setGenState] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [reload, setReload] = useState(0);
+  const [pregen, setPregen] = useState<PregenInfo | null>(null);
+  const pregenTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 挂载时检查是否有进行中/刚结束的预生成任务（页面切换回来也能续上进度）
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/study/pregen');
+        const d = await res.json();
+        if (alive && (d.running || ((d.phase === 'done' || d.phase === 'stopped') && d.total > 0))) setPregen(d);
+      } catch { /* ignore */ }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    function start() {
+      if (!pregenTimer.current) pregenTimer.current = setInterval(pollPregen, 2000);
+    }
+    function stop() {
+      if (pregenTimer.current) { clearInterval(pregenTimer.current); pregenTimer.current = null; }
+    }
+    async function pollPregen() {
+      try {
+        const res = await fetch('/api/study/pregen');
+        const d: PregenInfo = await res.json();
+        setPregen(d.running || ((d.phase === 'done' || d.phase === 'stopped') && d.total > 0) ? d : null);
+        if (!d.running) stop();
+      } catch { /* ignore */ }
+    }
+    if (pregen?.running) start(); else stop();
+    return stop;
+  }, [pregen?.running]);
+
+  async function startPregen() {
+    try {
+      await fetch('/api/study/pregen', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start' }),
+      });
+      const res = await fetch('/api/study/pregen');
+      setPregen(await res.json());
+    } catch { /* ignore */ }
+  }
+
+  async function stopPregen() {
+    await fetch('/api/study/pregen', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'stop' }),
+    }).catch(() => {});
+  }
 
   const grouped = useMemo(() => {
     const g = new Map<string, SyllabusItem[]>();
@@ -132,6 +193,44 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
         <div className="card flex items-center gap-2 border-violet-400/25 bg-violet-500/[0.07] p-3 text-[12.5px] text-violet-200">
           <Loader2 size={13} className={genState.includes('…') ? 'animate-spin' : 'hidden'} />
           {genState}
+        </div>
+      )}
+
+      {/* 知识内容预生成 */}
+      {pregen?.running ? (
+        <div className="card space-y-2 border-cyan-400/25 bg-cyan-500/[0.06] p-3">
+          <div className="flex items-center gap-2 text-[12.5px] text-cyan-200">
+            <Loader2 size={13} className="animate-spin" />
+            <span>
+              预生成 {pregen.phase === 'lesson' ? '图文讲解' : pregen.phase === 'quiz' ? '模拟题' : '动画演示'} · {pregen.done}/{pregen.total}
+            </span>
+            <button onClick={stopPregen} className="ml-auto flex items-center gap-1 rounded-lg border border-white/15 px-2 py-1 text-[11px] text-zinc-400">
+              <Square size={9} /> 停止
+            </button>
+          </div>
+          {pregen.current && <p className="truncate text-[11px] text-zinc-500">当前：{pregen.current}</p>}
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
+            <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all"
+              style={{ width: `${pregen.total ? (pregen.done / pregen.total) * 100 : 0}%` }} />
+          </div>
+          <p className="text-[10.5px] text-zinc-600">后台持续进行，可离开页面；已生成的内容立即缓存，点击知识点秒开。</p>
+        </div>
+      ) : pregen && (pregen.phase === 'done' || pregen.phase === 'stopped') ? (
+        <div className="card flex items-center gap-2 border-emerald-400/25 bg-emerald-500/[0.06] p-3 text-[12.5px] text-emerald-200">
+          <CheckCircle2 size={14} />
+          <span>
+            {pregen.phase === 'done' ? `✓ 全部 ${pregen.total} 项内容已预生成完毕` : '预生成已停止，下次可从断点继续'}
+            {pregen.failed.length > 0 && `（${pregen.failed.length} 项失败，可重跑补齐）`}
+          </span>
+          <button onClick={() => setPregen(null)} className="ml-auto text-[11px] text-zinc-500">关闭</button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <button onClick={startPregen}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.07] py-2 text-[12.5px] font-medium text-cyan-200">
+            <Zap size={13} /> 预生成全部知识点内容
+          </button>
+          <span className="text-[10.5px] text-zinc-600">讲解 + 模拟题 + 动画，后台生成并持久化</span>
         </div>
       )}
 
