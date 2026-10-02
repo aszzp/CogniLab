@@ -225,12 +225,12 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
           <button onClick={() => setPregen(null)} className="ml-auto text-[11px] text-zinc-500">关闭</button>
         </div>
       ) : (
-        <div className="flex items-center gap-2">
+        <div className="space-y-1.5">
           <button onClick={startPregen}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.07] py-2 text-[12.5px] font-medium text-cyan-200">
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.07] py-2 text-[12.5px] font-medium text-cyan-200">
             <Zap size={13} /> 预生成全部知识点内容
           </button>
-          <span className="text-[10.5px] text-zinc-600">讲解 + 模拟题 + 动画，后台生成并持久化</span>
+          <p className="text-center text-[10.5px] text-zinc-500">讲解 + 模拟题 + 动画，后台生成并持久化</p>
         </div>
       )}
 
@@ -327,14 +327,14 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
                                   </button>
                                   {!selecting && (
                                     <div className="flex shrink-0 items-center gap-1">
-                                      <button onClick={() => setLesson(it)} title="AI 讲解"
-                                        className="rounded-lg border border-violet-400/25 bg-violet-500/10 p-1.5 text-violet-300">
-                                        <BookOpen size={13} />
+                                      <button onClick={() => setLesson(it)} title="AI 讲解" aria-label={`AI 讲解：${it.topic}`}
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-400/25 bg-violet-500/10 text-violet-300">
+                                        <BookOpen size={14} />
                                       </button>
                                       {editMode && (
-                                        <button onClick={() => removeItem(it)} title="删除"
-                                          className="rounded-lg border border-rose-400/25 bg-rose-400/10 p-1.5 text-rose-300">
-                                          <Trash2 size={13} />
+                                        <button onClick={() => removeItem(it)} title="删除" aria-label={`删除：${it.topic}`}
+                                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-400/25 bg-rose-400/10 text-rose-300">
+                                          <Trash2 size={14} />
                                         </button>
                                       )}
                                     </div>
