@@ -31,6 +31,7 @@ export default function QuestionSession({
   const [results, setResults] = useState<Record<number, Result>>({});
   const [finished, setFinished] = useState(false);
   const tRef = useRef(0);
+  const navRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     tRef.current = nowMs();
   }, []);
@@ -44,6 +45,8 @@ export default function QuestionSession({
 
   function judge(ans: string) {
     if (locked) return;
+    // 单选/判断这里直接定格所选字母，否则错误选项不会标红（多选由 toggle 维护 picked）
+    if (q.type !== 'multi') setPicked([ans]);
     const correct = norm(ans) === norm(q.answer);
     const timeMs = nowMs() - tRef.current;
     setResults((r) => ({ ...r, [q.id]: { correct, picked: ans, timeMs } }));
@@ -59,6 +62,11 @@ export default function QuestionSession({
       }),
     }).catch(() => {});
   }
+
+  // 判分后反馈区把导航挤出视野，居中滚一下让「判分卡 + 下一题」同屏
+  useEffect(() => {
+    if (locked) navRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [locked]);
 
   function toggle(opt: string) {
     if (locked) return;
@@ -157,7 +165,7 @@ export default function QuestionSession({
           <span className="rounded-full bg-white/8 px-2 py-0.5 text-zinc-400">
             {isJudge ? '判断' : q.type === 'multi' ? '多选' : '单选'}
           </span>
-          <span className="ml-auto text-zinc-600">{q.source}</span>
+          <span className="ml-auto text-zinc-500">{q.source}</span>
         </div>
         <p className="text-[15.5px] leading-relaxed text-zinc-100">{q.stem}</p>
       </div>
@@ -182,7 +190,7 @@ export default function QuestionSession({
                     ? 'border-rose-400/50 bg-rose-400/10 text-rose-100'
                     : isPicked
                       ? 'border-violet-400/60 bg-violet-500/10 text-zinc-100'
-                      : 'border-white/10 bg-white/[0.03] text-zinc-300 active:scale-[0.99] disabled:opacity-70',
+                      : 'border-white/10 bg-white/[0.03] text-zinc-300 opacity-70 active:scale-[0.99]',
               ].join(' ')}
             >
               <span
@@ -236,7 +244,7 @@ export default function QuestionSession({
       )}
 
       {/* 底部导航 */}
-      <div className="flex gap-3 pt-1">
+      <div className="flex gap-3 pt-1" ref={navRef}>
         <button
           onClick={prev}
           disabled={idx === 0}

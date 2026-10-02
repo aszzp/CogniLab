@@ -40,7 +40,7 @@ export default function PracticePage() {
                   style={{ width: `${m.attempted ? Math.max(5, (m.attempted / m.total) * 100) : 0}%` }}
                 />
               </div>
-              <p className="mt-1.5 text-[10.5px] text-zinc-600">已练 {m.attempted} / {m.total} 题</p>
+              <p className="mt-1.5 text-[10.5px] text-zinc-500">已练 {m.attempted} / {m.total} 题</p>
             </div>
             <ChevronRight size={18} className="text-zinc-600" />
           </div>
