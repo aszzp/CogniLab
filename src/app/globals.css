@@ -69,15 +69,12 @@ body {
 }
 
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
+/* 只做透明度入场：keyframes 里保留 transform（即使 fill 后是 translateY(0)）
+   会让 .fade-up 成为 fixed 后代（讲解抽屉/答题卡/批量操作栏）的包含块，
+   把「视口固定」降级成「页面容器固定」，弹层会被定位到页面底部 */
 .fade-up {
   animation: fadeUp 0.35s ease both;
 }

@@ -144,9 +144,9 @@ export default function LessonDrawer({
   const MIcon = MASTER_ICON[topic.mastered];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm md:p-6" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm md:items-center md:p-6" onClick={onClose}>
       <div
-        className="drawer-in max-h-[86dvh] w-full max-w-[560px] overflow-y-auto rounded-3xl border border-white/12 bg-[#0b0b13]/98"
+        className="drawer-in max-h-[88dvh] w-full overflow-y-auto rounded-t-3xl border border-white/12 bg-[#0b0b13]/98 md:max-w-[560px] md:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 头部 */}
