@@ -29,20 +29,31 @@ export default function WrongPage() {
           <p className="flex-1 text-sm font-semibold text-white">开始复习（{due.length} 题）</p>
           <ChevronRight size={18} className="text-white/70" />
         </Link>
-      ) : (
+      ) : all > 0 ? (
         <div className="card p-6 text-center text-sm text-zinc-500">
           暂无到期错题 🎉 继续保持！
+        </div>
+      ) : (
+        <div className="card space-y-3 p-6 text-center">
+          <p className="text-sm text-zinc-400">还没有错题记录</p>
+          <p className="text-xs text-zinc-500">刷题时答错的题目会自动进入复习计划，答错 10 分钟后重现，答对间隔逐次递增</p>
+          <Link href="/practice" className="grad-btn inline-block rounded-xl px-5 py-2.5 text-sm font-medium text-white">
+            去刷题
+          </Link>
         </div>
       )}
 
       {due.length > 0 && (
-        <div className="card divide-y divide-white/6 p-2">
-          {due.slice(0, 20).map((q) => (
-            <div key={q.id} className="flex items-start gap-2 p-3 text-[13px]">
-              <span className="mt-0.5 shrink-0 rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-zinc-400">{q.module}</span>
-              <p className="line-clamp-2 flex-1 text-zinc-400">{q.stem}</p>
-            </div>
-          ))}
+        <div className="card p-2">
+          <p className="px-3 pb-1 pt-2 text-[10.5px] text-zinc-500">到期队列（前 {Math.min(20, due.length)} 题）· 答错 10 分钟后重现，答对间隔 1→3→… 天递增</p>
+          <div className="divide-y divide-white/6">
+            {due.slice(0, 20).map((q) => (
+              <div key={q.id} className="flex items-start gap-2 p-3 text-[13px]">
+                <span className="mt-0.5 shrink-0 rounded-full bg-white/8 px-2 py-0.5 text-[10px] text-zinc-400">{q.module}</span>
+                <p className="line-clamp-2 flex-1 text-zinc-400">{q.stem}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
