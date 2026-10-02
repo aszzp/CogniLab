@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <KunProvider>
           <AppNav />
-          <main className="mx-auto w-full max-w-2xl px-4 pb-28 pt-4 md:pb-12 md:pt-20">
+          <main className="mx-auto w-full max-w-2xl px-4 pb-44 pt-4 md:pb-28 md:pt-20">
             {children}
           </main>
         </KunProvider>

@@ -38,6 +38,11 @@ export function dueCount(): number {
   return r?.n ?? 0;
 }
 
+// created_at 存的是 localtime 字符串，日期键必须取本地日历日，不能用 toISOString（UTC）
+function localDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function streakDays(): number {
   const days = qAll<{ d: string }>(
     `SELECT DISTINCT date(created_at) AS d FROM attempts ORDER BY d DESC`,
@@ -47,8 +52,7 @@ export function streakDays(): number {
   const today = new Date();
   let streak = 0;
   for (let i = 0; i < 400; i++) {
-    const key = today.toISOString().slice(0, 10);
-    if (set.has(key)) {
+    if (set.has(localDateKey(today))) {
       streak++;
       today.setDate(today.getDate() - 1);
     } else break;
@@ -67,8 +71,7 @@ export function weekActivity(): { date: string; count: number }[] {
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    out.push({ date: `${d.getMonth() + 1}/${d.getDate()}`, count: map.get(key) ?? 0 });
+    out.push({ date: `${d.getMonth() + 1}/${d.getDate()}`, count: map.get(localDateKey(d)) ?? 0 });
   }
   return out;
 }
