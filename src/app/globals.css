@@ -44,7 +44,8 @@ body {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 1.25rem;
-  backdrop-filter: blur(12px);
+  /* 不加 backdrop-filter：长列表（实操 39 卡）滚动时每卡实时模糊开销大，
+     平铺背景下视觉差异可忽略；固定导航/抽屉各自带 backdrop-blur */
 }
 
 .grad-text {

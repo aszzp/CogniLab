@@ -41,7 +41,7 @@ export default function HandsOnPage() {
                 {t.category} · {t.points} 分制 · {t.source}
               </p>
             </div>
-            <ChevronRight size={17} className="shrink-0 text-zinc-600" />
+            <ChevronRight size={17} className="shrink-0 text-zinc-500" />
           </Link>
         );
       })}
