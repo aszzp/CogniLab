@@ -8,5 +8,12 @@ export default function QuickPage() {
   if (!questions.length) {
     return <p className="mt-10 text-center text-sm text-zinc-500">题库为空，请先运行 seed。</p>;
   }
-  return <QuestionSession questions={questions} mode="quick" title="碎片速刷" />;
+  return (
+    <QuestionSession
+      key={questions.map((q) => q.id).join('-')}
+      questions={questions}
+      mode="quick"
+      title="碎片速刷"
+    />
+  );
 }

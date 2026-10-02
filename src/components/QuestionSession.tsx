@@ -111,8 +111,11 @@ export default function QuestionSession({
             <Link href="/" className="flex-1 rounded-xl border border-white/10 py-2.5 text-center text-sm text-zinc-300">
               返回首页
             </Link>
-            <Link href="/practice" className="grad-btn flex-1 rounded-xl py-2.5 text-center text-sm font-medium text-white">
-              继续刷题
+            <Link
+              href={mode === 'quick' ? '/quick' : '/practice'}
+              className="grad-btn flex-1 rounded-xl py-2.5 text-center text-sm font-medium text-white"
+            >
+              {mode === 'quick' ? '再来一组' : '继续刷题'}
             </Link>
           </div>
         </div>
