@@ -27,7 +27,7 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
         <div className="mb-2 flex items-center gap-2 text-[11px]">
           <span className="rounded-full bg-violet-500/15 px-2 py-0.5 font-medium text-violet-300">{task.category}</span>
           <span className="rounded-full bg-white/8 px-2 py-0.5 text-zinc-400">{task.points} 分制</span>
-          <span className="ml-auto text-zinc-600">{task.source}</span>
+          <span className="ml-auto text-zinc-500">{task.source}</span>
         </div>
         <h1 className="text-[16px] font-bold">{task.title}</h1>
         <p className="mt-2.5 whitespace-pre-wrap text-[13.5px] leading-relaxed text-zinc-300">{task.prompt}</p>

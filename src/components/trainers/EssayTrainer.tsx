@@ -61,11 +61,13 @@ export default function EssayTrainer({ task }: { task: Task }) {
         onChange={(e) => setAnswer(e.target.value)}
         placeholder="在此作答…（建议按评分点分段，条理清晰）"
         rows={12}
-        className="w-full rounded-2xl border border-white/10 bg-[#0c0c14] p-4 text-[14px] leading-relaxed text-zinc-200 placeholder:text-zinc-600 focus:border-violet-400/50 focus:outline-none"
+        className="w-full rounded-2xl border border-white/10 bg-[#0c0c14] p-4 text-[14px] leading-relaxed text-zinc-200 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none"
       />
       <div className="flex items-center gap-3">
-        <span className="text-[11px] text-zinc-600">{answer.length} 字</span>
-        <button onClick={submit} disabled={loading}
+        <span className={`text-[11px] tabular-nums ${answer.trim().length >= 20 ? 'text-emerald-300' : 'text-amber-300/90'}`}>
+          {answer.length} 字{answer.trim().length < 20 && ` · 至少 20 字（还差 ${20 - answer.trim().length}）`}
+        </span>
+        <button onClick={submit} disabled={loading || answer.trim().length < 20}
           className="grad-btn flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white">
           {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
           {loading ? 'AI 评委批改中…' : '提交 AI 批改'}
@@ -76,11 +78,11 @@ export default function EssayTrainer({ task }: { task: Task }) {
         <div className="card border-amber-400/30 bg-amber-400/[0.06] p-3 text-[13px] text-amber-200">{grade.error}</div>
       )}
 
-      {grade?.items && (
+      {grade?.items && grade.total != null && grade.max != null && (
         <div className="fade-up space-y-3">
           <div className="card p-5 text-center">
             <p className="text-xs text-zinc-400">AI 评分</p>
-            <p className="mt-1 text-4xl font-bold grad-text">
+            <p className={`mt-1 text-4xl font-bold ${grade.total / grade.max >= 0.6 ? 'text-emerald-300' : 'text-amber-300'}`}>
               {grade.total}<span className="text-lg text-zinc-500"> / {grade.max}</span>
             </p>
           </div>
