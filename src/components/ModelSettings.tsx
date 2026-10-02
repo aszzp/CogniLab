@@ -166,7 +166,7 @@ export default function ModelSettings() {
         {saving ? <Loader2 size={14} className="animate-spin" /> : saved ? <Check size={14} /> : null}
         {saving ? '保存中…' : saved ? '已保存' : '保存配置'}
       </button>
-      <p className="mt-2 text-[10px] leading-relaxed text-zinc-600">
+      <p className="mt-2 text-[10.5px] leading-relaxed text-zinc-500">
         配置保存在本地数据库（settings 表），Key 仅服务端使用不会下发到浏览器。思考开关：阿里云 coding plan 用 enable_thinking，智谱 ZCode 用 thinking.type 参数。
       </p>
     </div>

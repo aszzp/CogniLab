@@ -18,8 +18,8 @@ export default function MePage() {
             { v: `${streakDays()} 天`, l: '连续练习' },
           ].map((x) => (
             <div key={x.l} className="rounded-xl bg-white/[0.03] py-3">
-              <p className="text-lg font-bold">{x.v}</p>
-              <p className="text-[10.5px] text-zinc-500">{x.l}</p>
+              <p className="text-xl font-bold tabular-nums">{x.v}</p>
+              <p className="mt-0.5 text-[10.5px] text-zinc-400">{x.l}</p>
             </div>
           ))}
         </div>
@@ -43,9 +43,9 @@ export default function MePage() {
         <p className="flex items-center gap-1.5 text-sm font-semibold text-zinc-200">
           <BookMarked size={14} className="text-cyan-300" /> 备考资料位置
         </p>
-        <p className="flex items-start gap-1.5"><FileText size={12} className="mt-0.5 shrink-0 text-zinc-600" /> 官方样题（含答案）：Sync/工作/网安/04_行业比赛/20260919 人工智能赛事/附件1…样题.pdf</p>
-        <p className="flex items-start gap-1.5"><FileText size={12} className="mt-0.5 shrink-0 text-zinc-600" /> 考试大纲与考点清单：同目录《考试大纲与考点清单.md》</p>
-        <p className="flex items-start gap-1.5"><FileText size={12} className="mt-0.5 shrink-0 text-zinc-600" /> 职业技能标准（2021版）：同目录《人工智能训练师国家职业技能标准2021.pdf》</p>
+        <p className="flex items-start gap-1.5"><FileText size={12} className="mt-0.5 shrink-0 text-zinc-500" /> 官方样题（含答案）：Sync/工作/网安/04_行业比赛/20260919 人工智能赛事/附件1…样题.pdf</p>
+        <p className="flex items-start gap-1.5"><FileText size={12} className="mt-0.5 shrink-0 text-zinc-500" /> 考试大纲与考点清单：同目录《考试大纲与考点清单.md》</p>
+        <p className="flex items-start gap-1.5"><FileText size={12} className="mt-0.5 shrink-0 text-zinc-500" /> 职业技能标准（2021版）：同目录《人工智能训练师国家职业技能标准2021.pdf》</p>
       </div>
 
       <div className="card space-y-2 p-5 text-[12px] text-zinc-500">

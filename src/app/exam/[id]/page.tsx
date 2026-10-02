@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { qGet } from '@/lib/db';
 import { loadQuestionsByIds } from '@/lib/exam';
 import ExamRunner from '@/components/ExamRunner';
@@ -13,7 +13,7 @@ export default async function ExamTaking({ params }: { params: Promise<{ id: str
   if (!exam) notFound();
   if (exam.finished_at) {
     // 已完成：跳回考试列表看历史
-    notFound();
+    redirect('/exam');
   }
   const questions = loadQuestionsByIds(JSON.parse(exam.question_ids));
   return <ExamRunner examId={exam.id} mode={exam.mode} questions={questions} />;
