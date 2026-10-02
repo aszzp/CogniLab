@@ -35,7 +35,7 @@ export default function Home() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="text-[16px] font-semibold text-white">碎片速刷 10 题</p>
-              <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[10.5px] font-medium text-white/90">约 5 分钟</span>
+              <span className="hidden min-[360px]:inline-flex shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[10.5px] font-medium text-white/90">约 5 分钟</span>
             </div>
             <p className="mt-1 text-xs text-white/75">智能组卷 · 到期错题 + 薄弱模块</p>
           </div>

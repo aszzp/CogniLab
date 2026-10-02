@@ -5,6 +5,25 @@ import { Bot, X, Send, Loader2, Wrench, Quote } from 'lucide-react';
 import Markdown from '../Markdown';
 import { useKun } from './kun-context';
 
+// 滚动期间隐藏悬浮球：短视口下悬浮球总会盖住某段内容，滚动结束 800ms 后浮现
+function useFabHidden() {
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const onScroll = () => {
+      setHidden(true);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setHidden(false), 800);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+  return hidden;
+}
+
 interface Msg {
   role: 'user' | 'assistant';
   content: string;
@@ -100,16 +119,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
   return (
     <>
       {/* 悬浮球 */}
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="打开坤哥助手"
-          className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 shadow-xl shadow-violet-500/30 transition-transform active:scale-90 md:bottom-8"
-        >
-          <Bot size={26} className="text-white" />
-          <span className="absolute -top-1 -right-1 rounded-full bg-rose-500 px-1.5 py-px text-[9px] font-bold text-white">坤</span>
-        </button>
-      )}
+      {!open && <FabButton onOpen={() => setOpen(true)} />}
 
       {/* 对话面板 */}
       {open && (
@@ -219,5 +229,21 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
         </div>
       )}
     </>
+  );
+}
+
+function FabButton({ onOpen }: { onOpen: () => void }) {
+  const hidden = useFabHidden();
+  return (
+    <button
+      onClick={onOpen}
+      aria-label="打开坤哥助手"
+      className={`fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 shadow-xl shadow-violet-500/30 transition-all duration-300 active:scale-90 md:bottom-8 ${
+        hidden ? 'pointer-events-none translate-y-2 opacity-0' : 'opacity-100'
+      }`}
+    >
+      <Bot size={26} className="text-white" />
+      <span className="absolute -top-1 -right-1 rounded-full bg-rose-500 px-1.5 py-px text-[9px] font-bold text-white">坤</span>
+    </button>
   );
 }
