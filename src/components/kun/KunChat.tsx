@@ -207,7 +207,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
                   }
                 }}
                 rows={1}
-                placeholder="问坤哥 anything…（Enter 发送）"
+                placeholder="问坤哥…（Enter 发送）"
                 className="max-h-28 min-h-[42px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-[13.5px] text-zinc-200 placeholder:text-zinc-600 focus:border-violet-400/50 focus:outline-none"
               />
               <button onClick={() => send()} disabled={loading || !input.trim()}
