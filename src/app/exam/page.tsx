@@ -14,6 +14,15 @@ export default function ExamPage() {
     sample45: '全真模拟', quick20: '快速模拟', sprint10: '冲刺小卷',
   };
 
+  // finished_at 为 "YYYY-MM-DD HH:mm:ss" 本地时间字符串，展示成 "MM-DD HH:mm"
+  function fmtTime(s: string) {
+    return s.slice(5, 16) ?? s;
+  }
+  function fmtDuration(sec: number | null) {
+    const s = sec ?? 0;
+    return s < 60 ? `${s} 秒` : `${Math.round(s / 60)} 分钟`;
+  }
+
   return (
     <div className="fade-up space-y-5">
       <div className="pt-1">
@@ -28,15 +37,15 @@ export default function ExamPage() {
           <div className="space-y-2.5">
             {history.map((h) => (
               <div key={h.id} className="flex items-center gap-3 rounded-xl bg-white/[0.03] p-3">
-                <span className={`text-xl font-bold ${((h.score ?? 0) >= 60) ? 'text-emerald-300' : 'text-rose-300'}`}>
-                  {h.score}
+                <span className={`w-12 shrink-0 text-right text-xl font-bold tabular-nums ${((h.score ?? 0) >= 60) ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  {h.score}<span className="ml-0.5 text-[10px] font-medium">分</span>
                 </span>
-                <div className="flex-1 text-xs">
+                <div className="min-w-0 flex-1 text-xs">
                   <p className="font-medium text-zinc-300">
                     {MODE_LABEL[h.mode] ?? h.mode} · 答对 {h.correct}/{h.total}
                   </p>
-                  <p className="mt-0.5 text-zinc-600">
-                    {h.finished_at} · 用时 {Math.round((h.duration_sec ?? 0) / 60)} 分钟
+                  <p className="mt-0.5 text-zinc-500">
+                    {fmtTime(h.finished_at)} · 用时 {fmtDuration(h.duration_sec)}
                   </p>
                 </div>
               </div>

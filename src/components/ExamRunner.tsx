@@ -103,7 +103,7 @@ export default function ExamRunner({
       <div className="fade-up space-y-4">
         <div className="card relative overflow-hidden p-6 text-center">
           <div className={`pointer-events-none absolute -top-14 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full blur-3xl ${pass ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`} />
-          <p className="text-xs text-zinc-400">{auto0(result.score)}模拟考成绩</p>
+          <p className="text-xs text-zinc-400">模拟考成绩</p>
           <p className={`mt-1 text-6xl font-bold ${pass ? 'text-emerald-300' : 'text-rose-300'}`}>{result.score}</p>
           <p className="mt-1 text-sm text-zinc-400">
             答对 {result.correct} / {result.total} · {pass ? '恭喜及格 🎉' : '继续加油，重点补弱项'}
@@ -117,7 +117,7 @@ export default function ExamRunner({
               const pct = Math.round((v.c / v.n) * 100);
               return (
                 <div key={mod} className="flex items-center gap-3 text-xs">
-                  <span className="w-16 shrink-0 text-zinc-300">{mod}</span>
+                  <span className="w-20 shrink-0 truncate text-zinc-300" title={mod}>{mod}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/8">
                     <div
                       className={`h-full rounded-full ${pct >= 60 ? 'bg-gradient-to-r from-violet-500 to-cyan-400' : 'bg-gradient-to-r from-amber-500 to-rose-400'}`}
@@ -295,8 +295,4 @@ export default function ExamRunner({
       )}
     </div>
   );
-}
-
-function auto0(n: number) {
-  return n >= 90 ? '🏆 ' : n >= 60 ? '✅ ' : '💪 ';
 }
