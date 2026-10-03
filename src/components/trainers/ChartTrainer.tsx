@@ -213,27 +213,39 @@ export default function ChartTrainer({ task }: { task: Task }) {
       </button>
 
       {checks && (
-        <div className="fade-up card divide-y divide-white/6 p-2">
-          {checks.map((c) => (
-            <div key={c.label} className="flex items-center gap-2.5 px-3 py-2.5 text-[13px]">
-              {c.ok
-                ? <CheckCircle2 size={15} className="shrink-0 text-emerald-400" />
-                : <XCircle size={15} className="shrink-0 text-rose-400" />}
-              <span className="w-24 shrink-0 text-zinc-400">{c.label}</span>
-              <span className="min-w-0 flex-1">
-                {c.ok ? <span className="text-emerald-200">✓ {c.got}</span> : (
-                  <>
-                    <span className="text-rose-300 line-through">{c.got}</span>
-                    <span className="ml-2 text-emerald-300">→ {c.want}</span>
-                  </>
-                )}
-              </span>
-            </div>
-          ))}
-          <p className="px-3 py-2.5 text-xs text-zinc-500">
-            通过 {checks.filter((c) => c.ok).length} / {checks.length} 项
-            {checks.every((c) => c.ok) && ' 🎉 与监控图表配置完全一致！'}
-          </p>
+        <div className="fade-up card overflow-hidden p-2">
+          {(() => {
+            const passed = checks.filter((c) => c.ok).length;
+            const all = checks.length;
+            return (
+              <p className={`flex items-center justify-between px-3 py-2.5 text-[13px] font-semibold ${
+                passed === all ? 'bg-emerald-400/10 text-emerald-200'
+                  : passed === 0 ? 'bg-rose-400/10 text-rose-200'
+                    : 'bg-amber-400/10 text-amber-200'
+              }`}>
+                <span>判分结果</span>
+                <span className="tabular-nums">通过 {passed} / {all} 项{passed === all && ' 🎉'}</span>
+              </p>
+            );
+          })()}
+          <div className="divide-y divide-white/6">
+            {checks.map((c) => (
+              <div key={c.label} className="flex items-center gap-2.5 px-3 py-2.5 text-[13px]">
+                {c.ok
+                  ? <CheckCircle2 size={15} className="shrink-0 text-emerald-400" />
+                  : <XCircle size={15} className="shrink-0 text-rose-400" />}
+                <span className="w-24 shrink-0 text-zinc-400">{c.label}</span>
+                <span className="min-w-0 flex-1">
+                  {c.ok ? <span className="text-emerald-200">✓ {c.got}</span> : (
+                    <>
+                      <span className="text-rose-300 line-through">{c.got}</span>
+                      <span className="ml-2 text-emerald-300">→ {c.want}</span>
+                    </>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
