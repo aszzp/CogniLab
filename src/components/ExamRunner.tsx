@@ -220,7 +220,7 @@ export default function ExamRunner({
         })}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 pr-16 md:pr-0">
         <button onClick={() => setIdx(Math.max(0, idx - 1))} disabled={idx === 0}
           className="flex items-center gap-1 rounded-xl border border-white/10 px-4 py-2.5 text-sm text-zinc-300 disabled:opacity-30">
           <ChevronLeft size={15} /> 上一题

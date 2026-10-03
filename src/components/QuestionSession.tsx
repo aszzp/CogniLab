@@ -246,8 +246,8 @@ export default function QuestionSession({
         </div>
       )}
 
-      {/* 底部导航 */}
-      <div className="flex gap-3 pt-1" ref={navRef}>
+      {/* 底部导航（pr 给坤哥悬浮球让位，防止按钮右端被盖住） */}
+      <div className="flex gap-3 pt-1 pr-16 md:pr-0" ref={navRef}>
         <button
           onClick={prev}
           disabled={idx === 0}
