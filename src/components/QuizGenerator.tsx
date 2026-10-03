@@ -16,7 +16,8 @@ interface GenQ {
 
 export default function QuizGenerator() {
   const router = useRouter();
-  const [mod, setMod] = useState('数字人');
+  // 默认值必须是 MODULES 里真实存在的模块，否则首屏无选中芯片、直接生成会落到不存在的模块
+  const [mod, setMod] = useState(MODULES[MODULES.length - 1]);
   const [qs, setQs] = useState<GenQ[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -74,11 +75,12 @@ export default function QuizGenerator() {
       <button onClick={generate} disabled={loading}
         className="grad-btn mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold text-white">
         {loading ? <Loader2 size={14} className="animate-spin" /> : <PlusCircle size={14} />}
-        {loading ? '命题中…' : `生成 5 道「${mod}」新题`}
+        {loading ? '命题中…' : `生成「${mod}」新题`}
       </button>
 
       {qs && (
         <div className="fade-up mt-4 space-y-2.5">
+          <p className="text-[11px] text-zinc-500">已生成 {qs.length} 题，请预览确认：</p>
           {qs.map((q, i) => (
             <div key={i} className="rounded-xl bg-white/[0.03] p-3 text-[12.5px]">
               <p className="text-zinc-200">
