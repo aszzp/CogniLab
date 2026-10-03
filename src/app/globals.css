@@ -40,12 +40,17 @@ body {
   border-radius: 3px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 1.25rem;
-  /* 不加 backdrop-filter：长列表（实操 39 卡）滚动时每卡实时模糊开销大，
-     平铺背景下视觉差异可忽略；固定导航/抽屉各自带 backdrop-blur */
+/* 放进 components 层：.card 的 border/background 简写会压过 utilities 层的
+   border-<color>/bg-<color>，导致全站卡片语义色（错题提示琥珀、判分红绿等）失效；
+   分层后工具类才能正常覆盖 */
+@layer components {
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    /* 不加 backdrop-filter：长列表（实操 39 卡）滚动时每卡实时模糊开销大，
+       平铺背景下视觉差异可忽略；固定导航/抽屉各自带 backdrop-blur */
+  }
 }
 
 .grad-text {

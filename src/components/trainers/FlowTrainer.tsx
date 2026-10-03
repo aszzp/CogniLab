@@ -99,8 +99,15 @@ function FlowExercise({ task }: { task: Task }) {
         检查全部条件
       </button>
       {checked && (
-        <div role="status" className="card space-y-3 p-4 text-sm text-zinc-300">
-          <p>正确 {correct} / {answers.length} 项；训练得分 {((correct / answers.length) * task.points).toFixed(1)} / {task.points}。</p>
+        <div role="status" className={`card space-y-3 p-4 text-sm text-zinc-300 ${
+          correct === answers.length ? 'border-emerald-400/30 bg-emerald-400/[0.05]'
+            : correct === 0 ? 'border-rose-400/30 bg-rose-400/[0.05]'
+              : 'border-amber-400/30 bg-amber-400/[0.05]'
+        }`}>
+          <p>
+            正确 <span className="font-semibold tabular-nums">{correct} / {answers.length}</span> 项；训练得分{' '}
+            <span className="font-semibold tabular-nums">{((correct / answers.length) * task.points).toFixed(1)} / {task.points}</span>。
+          </p>
           <p className="text-xs text-zinc-500">本页检查所填条件，不代表完整流程设计能力或官方评分。</p>
           {task.meta.referenceAnswer && (
             <details><summary className="cursor-pointer text-violet-200">查看参考分析</summary>
