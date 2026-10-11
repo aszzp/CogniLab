@@ -30,7 +30,7 @@ export default function ExamStarter() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
       {MODES.map((m) => (
         <button
           key={m.mode}
@@ -38,12 +38,12 @@ export default function ExamStarter() {
           disabled={!!loading}
           className={`flex w-full items-center gap-4 rounded-2xl bg-gradient-to-r ${m.cls} p-5 text-left transition-transform active:scale-[0.98] disabled:opacity-50`}
         >
-          <Timer size={22} className="text-white/90" />
+          <Timer size={22} className="shrink-0 text-white/90" />
           <div className="flex-1">
             <p className="text-[15px] font-semibold text-white">{m.title}</p>
             <p className="mt-0.5 text-[11px] text-white/70">{m.desc}</p>
           </div>
-          <span className="text-xs font-medium text-white/80">
+          <span className="shrink-0 text-xs font-medium text-white/80">
             {loading === m.mode ? '组卷中…' : '开始'}
           </span>
         </button>

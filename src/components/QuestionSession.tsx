@@ -144,7 +144,7 @@ export default function QuestionSession({
   /* ---------- 答题页 ---------- */
   const isJudge = q.type === 'judge';
   return (
-    <div className="fade-up space-y-4" key={q.id}>
+    <div className="fade-up mx-auto w-full max-w-3xl space-y-4" key={q.id}>
       {/* 进度 */}
       <div>
         <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">

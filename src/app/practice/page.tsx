@@ -23,8 +23,9 @@ export default function PracticePage() {
         <h1 className="text-lg font-bold">模块刷题</h1>
         <span className="ml-auto text-xs text-zinc-500">{stats.reduce((a, b) => a + b.total, 0)} 题</span>
       </div>
-      {stats.map((m) => (
-        <Link key={m.module} href={`/practice/${encodeURIComponent(m.module)}`} className="card block p-5 transition-transform active:scale-[0.99]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {stats.map((m) => (
+          <Link key={m.module} href={`/practice/${encodeURIComponent(m.module)}`} className="card block p-5 transition-transform active:scale-[0.99]">
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <div className="flex items-baseline gap-2">
@@ -45,7 +46,8 @@ export default function PracticePage() {
             <ChevronRight size={18} className="text-zinc-600" />
           </div>
         </Link>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

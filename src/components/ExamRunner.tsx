@@ -100,7 +100,7 @@ export default function ExamRunner({
   if (result) {
     const pass = result.score >= 60;
     return (
-      <div className="fade-up space-y-4">
+      <div className="fade-up mx-auto w-full max-w-3xl space-y-4">
         <div className="card relative overflow-hidden p-6 text-center">
           <div className={`pointer-events-none absolute -top-14 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full blur-3xl ${pass ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`} />
           <p className="text-xs text-zinc-400">模拟考成绩</p>
@@ -165,7 +165,7 @@ export default function ExamRunner({
 
   /* ---------- 答题页 ---------- */
   return (
-    <div className="fade-up space-y-4">
+    <div className="fade-up mx-auto w-full max-w-3xl space-y-4">
       {/* 计时 & 进度 */}
       <div className="card flex items-center justify-between p-4">
         <div>
