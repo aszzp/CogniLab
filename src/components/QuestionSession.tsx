@@ -63,9 +63,13 @@ export default function QuestionSession({
     }).catch(() => {});
   }
 
-  // 判分后反馈区把导航挤出视野，居中滚一下让「判分卡 + 下一题」同屏
+  // 判分后反馈区把导航挤出视野，居中滚一下让「判分卡 + 下一题」同屏；
+  // 系统开启「减弱动态效果」时跳过平滑滚动
   useEffect(() => {
-    if (locked) navRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (locked) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      navRef.current?.scrollIntoView({ block: 'center', behavior: reduce ? 'instant' : 'smooth' });
+    }
   }, [locked]);
 
   function toggle(opt: string) {
