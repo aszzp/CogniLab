@@ -101,7 +101,8 @@ export default function GraphView({
       <div className="card p-2">
         <p className="px-2 pb-1 pt-1 text-[10.5px] text-zinc-500">知识图谱 · 点击章节节点查看知识点（左右滑动查看全图）</p>
         <div className="overflow-x-auto" ref={scrollerRef}>
-          <svg viewBox="-320 -320 640 640" className="h-[min(78vw,560px)] min-w-[540px]">
+          {/* viewBox 预留 340 半径：松弛迭代可能把胶囊推到 ~336，320 会硬裁切 */}
+          <svg viewBox="-340 -340 680 680" className="mx-auto block h-auto w-full min-w-[560px] lg:min-w-0">
           <defs>
             <radialGradient id="graph-halo">
               <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.14" />
@@ -136,6 +137,7 @@ export default function GraphView({
           {/* 模块与章节 */}
           {layout.map((m) => (
             <g key={m.name}>
+              <title>{`${m.name} · 掌握 ${m.mastered}/${m.total}`}</title>
               <circle cx={m.x} cy={m.y} r={36} fill={`url(#g-${m.name})`} stroke={m.color} strokeOpacity={0.7} strokeWidth={1.5} />
               <text x={m.x} y={m.y - 6} textAnchor="middle" fill="#fff" fontSize={11} fontWeight={700}>{SHORT[m.name]?.[0] ?? m.name}</text>
               <text x={m.x} y={m.y + 6} textAnchor="middle" fill="#fff" fontSize={11} fontWeight={700}>{SHORT[m.name]?.[1] ?? ''}</text>
@@ -143,11 +145,21 @@ export default function GraphView({
               {m.sections.map((s) => {
                 const active = activeSection?.module === m.name && activeSection?.section === s.sec;
                 return (
-                  <g key={s.sec} onClick={() => setActiveSection(active ? null : { module: m.name, section: s.sec })}
-                    className="cursor-pointer">
+                  <g key={s.sec} role="button" tabIndex={0}
+                    aria-label={`${m.name} / ${s.sec}，${items.filter((x) => x.module === m.name && x.section === s.sec).length} 个知识点`}
+                    onClick={() => setActiveSection(active ? null : { module: m.name, section: s.sec })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveSection(active ? null : { module: m.name, section: s.sec });
+                      }
+                    }}
+                    className="cursor-pointer outline-none group">
+                    <title>{`${m.name} / ${s.sec}（点击查看知识点）`}</title>
                     <rect x={s.x - s.w / 2} y={s.y - 14} width={s.w} height={28} rx={14}
                       fill={active ? m.color : '#15151f'} fillOpacity={active ? 0.85 : 0.95}
-                      stroke={m.color} strokeOpacity={active ? 1 : 0.35} strokeWidth={1.2} />
+                      stroke={m.color} strokeOpacity={active ? 1 : 0.35} strokeWidth={1.2}
+                      className="group-focus:[stroke-width:2.5px]" />
                     <text x={s.x} y={s.y + 4.5} textAnchor="middle" fill={active ? '#fff' : '#d4d4d8'} fontSize={11}>
                       {s.sec.length > 8 ? s.sec.slice(0, 8) + '…' : s.sec}
                     </text>

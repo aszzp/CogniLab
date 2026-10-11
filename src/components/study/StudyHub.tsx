@@ -177,8 +177,8 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
         </span>
       </div>
 
-      {/* 视图切换 */}
-      <div className="flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
+      {/* 视图切换（桌面双栏常显，仅移动端需要） */}
+      <div className="flex rounded-2xl border border-white/10 bg-white/[0.03] p-1 lg:hidden">
         {([['graph', '知识图谱', Network], ['list', '考纲清单', ListChecks]] as const).map(([v, label, Icon]) => (
           <button key={v} onClick={() => setView(v)}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-[13px] font-medium transition-colors ${
@@ -234,13 +234,16 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
         </div>
       )}
 
-      {view === 'graph' ? (
-        <GraphView
-          items={items}
-          onSelectTopic={(t) => setLesson(t)}
-        />
-      ) : (
-        <div className="space-y-3">
+      {/* 桌面：图谱（左，sticky）+ 清单（右）双栏；移动端按 view 切换 */}
+      <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4">
+        <div className={`${view === 'graph' ? '' : 'hidden'} lg:sticky lg:top-20 lg:col-span-6 lg:block`}>
+          <GraphView
+            items={items}
+            onSelectTopic={(t) => setLesson(t)}
+          />
+        </div>
+        <div className={`${view === 'list' ? '' : 'hidden'} lg:col-span-6 lg:block`}>
+          <div className="space-y-3">
           {/* 编辑/多选控制 */}
           <div className="flex gap-2">
             <button onClick={() => { setSelecting(!selecting); setSelected(new Set()); }}
@@ -363,8 +366,9 @@ export default function StudyHub({ items: initial }: { items: SyllabusItem[] }) 
               </button>
             </div>
           )}
+          </div>
         </div>
-      )}
+      </div>
 
       {/* 添加知识点 */}
       {adding && <AddTopicDialog modules={MODULE_ORDER.filter((m) => grouped.has(m))} onClose={() => setAdding(false)} onDone={() => { refresh(); setReload((r) => r + 1); }} />}
