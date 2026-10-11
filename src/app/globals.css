@@ -73,6 +73,23 @@ body {
   box-shadow: none;
 }
 
+/* 桌面指针设备：卡片/渐变按钮悬停反馈（触屏无 hover，不影响移动端）。
+   语义色卡片（琥珀错题条等）的工具类在 utilities 层，天然压过这里的组件层悬停色 */
+@media (hover: hover) and (pointer: fine) {
+  a.card,
+  button.card {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  a.card:hover,
+  button.card:hover {
+    background-color: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.17);
+  }
+  .grad-btn:hover {
+    filter: brightness(1.09);
+  }
+}
+
 @keyframes fadeUp {
   from { opacity: 0; }
   to { opacity: 1; }
