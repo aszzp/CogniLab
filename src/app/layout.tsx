@@ -18,8 +18,6 @@ export const viewport: Viewport = {
   themeColor: '#07070c',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <KunProvider>
           <AppNav />
-          <main className="mx-auto w-full max-w-2xl px-4 pb-44 pt-4 md:pb-28 md:pt-20">
+          <main className="mx-auto w-full max-w-2xl px-4 pb-44 pt-4 md:pb-28 md:pt-20 lg:max-w-6xl lg:px-8">
             {children}
           </main>
         </KunProvider>

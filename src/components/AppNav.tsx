@@ -24,7 +24,7 @@ export default function AppNav() {
     <>
       {/* 桌面顶部导航 */}
       <header className="fixed inset-x-0 top-0 z-40 hidden border-b border-white/8 bg-[#07070c]/80 backdrop-blur-xl md:block">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-4 px-4 md:max-w-4xl lg:max-w-6xl lg:px-8">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500">
               <BrainCircuit size={18} className="text-white" />
