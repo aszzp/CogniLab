@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Network, ListChecks, Plus, Trash2, Loader2, Sparkles, BookOpen, CircleDot, CheckCircle2, CircleCheckBig, ChevronDown, Zap, Square } from 'lucide-react';
 import GraphView from './GraphView';
 import LessonDrawer from './LessonDrawer';
+import { useEscape } from '@/lib/use-escape';
 import type { SyllabusItem } from '@/app/study/page';
 
 const MODULE_ORDER = ['职业道德与基础知识', '数据处理与标注', '业务分析', '智能训练', '智能系统设计', '培训与指导', '数字人专项'];
@@ -390,6 +391,7 @@ function GraduationCapIcon() {
 }
 
 function AddTopicDialog({ modules, onClose, onDone }: { modules: string[]; onClose: () => void; onDone: () => void }) {
+  useEscape(true, onClose);
   const [module, setModule] = useState(modules[0] ?? '数字人');
   const [section, setSection] = useState('');
   const [topic, setTopic] = useState('');

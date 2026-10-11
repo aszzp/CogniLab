@@ -94,6 +94,19 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+/* 前庭敏感用户：关闭入场/脉冲/抽屉/悬停动效（系统「减弱动态效果」开启时生效） */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up,
+  .drawer-in,
+  .pulse-soft {
+    animation: none;
+  }
+  a.card,
+  button.card,
+  .grad-btn {
+    transition: none;
+  }
+}
 /* 只做透明度入场：keyframes 里保留 transform（即使 fill 后是 translateY(0)）
    会让 .fade-up 成为 fixed 后代（讲解抽屉/答题卡/批量操作栏）的包含块，
    把「视口固定」降级成「页面容器固定」，弹层会被定位到页面底部 */

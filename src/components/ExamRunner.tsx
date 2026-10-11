@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Grid3x3, Send, Check, X } from 'lucide-react';
 import AIExplain from './AIExplain';
+import { useEscape } from '@/lib/use-escape';
 import type { Question } from '@/lib/types';
 
 interface PerResult {
@@ -32,6 +33,9 @@ export default function ExamRunner({
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [timeLeft, setTimeLeft] = useState(PLAN_SEC[mode] ?? 2400);
   const submittedRef = useRef(false);
+
+  useEscape(showSheet, () => setShowSheet(false));
+  useEscape(confirming, () => setConfirming(false));
 
   const q = questions[idx];
   const answeredCount = Object.keys(answers).length;

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, BookOpen, Play, RotateCw, Sparkles, Loader2, CircleDot, CheckCircle2, CircleCheckBig, Zap } from 'lucide-react';
 import Markdown from '../Markdown';
+import { useEscape } from '@/lib/use-escape';
 import type { SyllabusItem } from '@/app/study/page';
 
 interface GenQ {
@@ -36,6 +37,8 @@ export default function LessonDrawer({
   const [quizCached, setQuizCached] = useState(false);
   const [quizState, setQuizState] = useState<'none' | 'loading' | 'saved'>('none');
   const started = useRef<number | null>(null);
+
+  useEscape(true, onClose);
 
   // 打开（或切换知识点）时：命中缓存直接秒出（不走流式），仅缺失时流式生成讲解
   useEffect(() => {
@@ -175,7 +178,7 @@ export default function LessonDrawer({
               <MIcon size={16} className={MASTER_CLS[topic.mastered]} />
               <span className="text-[9px] text-zinc-500">{MASTER_LABEL[topic.mastered]}</span>
             </button>
-            <button onClick={onClose} className="rounded-lg p-1 text-zinc-400 hover:text-white"><X size={18} /></button>
+            <button onClick={onClose} aria-label="关闭讲解" className="rounded-lg p-1 text-zinc-400 hover:text-white"><X size={18} /></button>
           </div>
           {/* Tab */}
           <div className="mt-3 flex rounded-xl bg-white/[0.04] p-1">

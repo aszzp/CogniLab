@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Bot, X, Send, Loader2, Wrench, Quote } from 'lucide-react';
 import Markdown from '../Markdown';
 import { useKun } from './kun-context';
+import { useEscape } from '@/lib/use-escape';
 
 // 滚动期间隐藏悬浮球：短视口下悬浮球总会盖住某段内容，滚动结束 800ms 后浮现
 function useFabHidden() {
@@ -65,6 +66,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
   const msgs = useSyncExternalStore(subscribeMsgs, getMsgs, getServerMsgs);
   const lastSeq = useRef(askSeq);
   const listRef = useRef<HTMLDivElement>(null);
+  useEscape(open, () => setOpen(false));
 
   useEffect(() => {
     if (askSeq !== lastSeq.current && askText) {
