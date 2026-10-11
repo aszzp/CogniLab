@@ -22,8 +22,8 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
   };
 
   return (
-    <div className="fade-up space-y-4">
-      <div className="card p-5">
+    <div className="fade-up space-y-4 lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 lg:space-y-0">
+      <div className="card p-5 lg:sticky lg:top-20 lg:col-span-5">
         <div className="mb-2 flex items-center gap-2 text-[11px]">
           <span className="rounded-full bg-violet-500/15 px-2 py-0.5 font-medium text-violet-300">{task.category}</span>
           <span className="rounded-full bg-white/8 px-2 py-0.5 text-zinc-400">{task.points} 分制</span>
@@ -32,11 +32,13 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
         <h1 className="text-[16px] font-bold">{task.title}</h1>
         <p className="mt-2.5 whitespace-pre-wrap text-[13.5px] leading-relaxed text-zinc-300">{task.prompt}</p>
       </div>
-      {task.kind === 'sql' && <SqlTrainer task={task} />}
-      {task.kind === 'python' && <PythonTrainer task={task} />}
-      {task.kind === 'essay' && <EssayTrainer task={task} />}
-      {task.kind === 'chart' && <ChartTrainer task={task} />}
-      {task.kind === 'flow' && <FlowTrainer task={task} />}
+      <div className="lg:col-span-7">
+        {task.kind === 'sql' && <SqlTrainer task={task} />}
+        {task.kind === 'python' && <PythonTrainer task={task} />}
+        {task.kind === 'essay' && <EssayTrainer task={task} />}
+        {task.kind === 'chart' && <ChartTrainer task={task} />}
+        {task.kind === 'flow' && <FlowTrainer task={task} />}
+      </div>
     </div>
   );
 }

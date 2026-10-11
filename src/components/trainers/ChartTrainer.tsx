@@ -103,7 +103,7 @@ export default function ChartTrainer({ task }: { task: Task }) {
           tooltip: { trigger: 'axis' },
           xAxis: { type: 'category', data: rowVals },
           yAxis: { type: 'value' },
-          series: [{ type: cfg.chartType, smooth: true, data: byRow, itemStyle: { color: '#7c3aed' } }],
+          series: [{ type: cfg.chartType, smooth: true, barMaxWidth: 46, data: byRow, itemStyle: { color: '#7c3aed' } }],
         });
       }
     });
