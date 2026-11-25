@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Zap, BookOpen, Timer, Flame, Target, TrendingUp, ChevronRight, BarChart3, ChartColumn } from 'lucide-react';
+import { Zap, BookOpen, Timer, Flame, Target, TrendingUp, ChevronRight, BarChart3, ChartColumn, Trophy } from 'lucide-react';
 import {
   moduleStats, dueCount, streakDays, weekActivity, totalAttempts, overallAccuracy, daysToExam,
 } from '@/lib/stats';
@@ -58,6 +58,18 @@ export default function Home() {
           </div>
           <ChevronRight size={20} className="shrink-0 text-white/70" />
         </div>
+      </Link>
+
+      {/* 决赛模拟入口：全国总决赛 57 题（单选 50 + 编程 7） */}
+      <Link href="/finals" className="card flex items-center gap-3 border-cyan-400/25 bg-cyan-400/[0.06] p-4">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-400/15">
+          <Trophy size={17} className="text-cyan-300" />
+        </span>
+        <p className="flex-1 text-sm">
+          <span className="font-semibold text-cyan-200">决赛模拟</span>
+          <span className="ml-1 text-zinc-400">57 题 · 100 分 · 180 分钟 · 编程题自动判分</span>
+        </p>
+        <ChevronRight size={16} className="shrink-0 text-zinc-500" />
       </Link>
 
       {/* 行入口 */}

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { ChevronRight, Trophy } from 'lucide-react';
 import { qAll } from '@/lib/db';
 import ExamStarter from '@/components/ExamStarter';
 
@@ -29,6 +31,16 @@ export default function ExamPage() {
         <h1 className="text-lg font-bold">模拟考试</h1>
         <p className="mt-0.5 text-xs text-zinc-500">全真模式按官方样卷结构组题：数字人15 · 业务分析15 · 智能训练8 · 系统设计7</p>
       </div>
+      <Link href="/finals" className="card flex items-center gap-3 border-cyan-400/25 bg-cyan-400/[0.06] p-4">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-400/15">
+          <Trophy size={17} className="text-cyan-300" />
+        </span>
+        <p className="flex-1 text-sm">
+          <span className="font-semibold text-cyan-200">决赛模拟</span>
+          <span className="ml-1 text-zinc-400">全国总决赛题型：57 题 · 100 分 · 180 分钟</span>
+        </p>
+        <ChevronRight size={16} className="shrink-0 text-zinc-500" />
+      </Link>
       <ExamStarter />
 
       {history.length > 0 && (

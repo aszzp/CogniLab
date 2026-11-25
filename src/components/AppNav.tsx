@@ -20,6 +20,8 @@ function isActive(pathname: string, href: string) {
 
 export default function AppNav() {
   const pathname = usePathname() || '/';
+  // 决赛模拟答题页不显示全站导航：考试期间页面内不提供离开答题的入口
+  if (pathname.startsWith('/finals/attempt/')) return null;
   return (
     <>
       {/* 桌面顶部导航 */}

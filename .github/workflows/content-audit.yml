@@ -3,7 +3,7 @@ on:
   push:
     branches: [codex/syllabus-question-bank-expansion]
   pull_request:
-    paths: ['data/**', 'docs/**', 'scripts/**', '.github/workflows/content-audit.yml']
+    paths: ['data/**', 'docs/**', 'scripts/**', 'src/lib/python-judge.mjs', '.github/workflows/content-audit.yml']
 permissions:
   contents: read
 jobs:
@@ -30,6 +30,11 @@ jobs:
         run: |
           if [ -f scripts/validate-content.mjs ]; then
             node scripts/validate-content.mjs
+          fi
+      - name: Validate finals mock papers when present
+        run: |
+          if [ -f scripts/finals/check.mjs ]; then
+            node scripts/finals/check.mjs --report audit/finals-check.json
           fi
       - uses: actions/upload-artifact@v4
         with:

@@ -91,6 +91,32 @@ CREATE TABLE IF NOT EXISTS lessons (
   anim_html TEXT,
   created_at TEXT DEFAULT (datetime('now','localtime'))
 );
+CREATE TABLE IF NOT EXISTS finals_attempts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  set_id TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'ongoing',
+  started_at INTEGER NOT NULL,
+  deadline_at INTEGER,
+  finished_at INTEGER,
+  end_reason TEXT,
+  answers TEXT NOT NULL DEFAULT '{}',
+  code TEXT NOT NULL DEFAULT '{}',
+  submissions TEXT NOT NULL DEFAULT '{}',
+  switch_count INTEGER NOT NULL DEFAULT 0,
+  rev INTEGER NOT NULL DEFAULT 0,
+  score REAL,
+  theory_score REAL,
+  code_score REAL,
+  created_at TEXT DEFAULT (datetime('now','localtime'))
+);
+CREATE TABLE IF NOT EXISTS finals_practice (
+  problem_key TEXT PRIMARY KEY,
+  code TEXT NOT NULL DEFAULT '',
+  best_passed INTEGER NOT NULL DEFAULT 0,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT DEFAULT (datetime('now','localtime'))
+);
 `;
 
 function migrate(d: DatabaseSync) {

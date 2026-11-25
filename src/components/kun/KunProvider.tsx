@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import KunChat from './KunChat';
 import { Ctx } from './kun-context';
 
@@ -10,6 +11,8 @@ export default function KunProvider({ children }: { children: React.ReactNode })
   const [askText, setAskText] = useState('');
   const [sel, setSel] = useState<{ text: string; x: number; y: number } | null>(null);
   const [askSeq, setAskSeq] = useState(0);
+  // 决赛模拟答题页不挂载悬浮助手
+  const inExam = (usePathname() ?? '').startsWith('/finals/attempt/');
 
   const ask = useCallback((text: string) => {
     setQuote('');
@@ -56,7 +59,7 @@ export default function KunProvider({ children }: { children: React.ReactNode })
     <Ctx.Provider value={{ open, setOpen, quote, setQuote, ask }}>
       {children}
       {/* 选中文字气泡 */}
-      {sel && !open && (
+      {sel && !open && !inExam && (
         <button
           onClick={() => {
             setQuote(sel.text);
@@ -70,7 +73,7 @@ export default function KunProvider({ children }: { children: React.ReactNode })
           ✨ 问坤哥
         </button>
       )}
-      <KunChat askText={askText} askSeq={askSeq} />
+      {inExam ? null : <KunChat askText={askText} askSeq={askSeq} />}
     </Ctx.Provider>
   );
 }
