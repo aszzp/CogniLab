@@ -33,6 +33,13 @@ export const DEFAULT_CONFIG: AIConfig = {
       models: ['glm-5.3', 'glm-5.3-flash'],
       thinkingStyle: 'zhipu',
     },
+    g4: {
+      name: 'G4 中继 DeepSeek',
+      baseUrl: 'https://g4pro.eastzzp.cn/llm/v1',
+      apiKey: process.env.G4_API_KEY || '',
+      models: ['deepseek-v4.1-flash-1017'],
+      thinkingStyle: 'dashscope',
+    },
   },
   assign: {
     explain: 'dashscope:qwen3.7-plus',
