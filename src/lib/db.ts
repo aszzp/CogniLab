@@ -117,6 +117,28 @@ CREATE TABLE IF NOT EXISTS finals_practice (
   attempts INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT DEFAULT (datetime('now','localtime'))
 );
+CREATE TABLE IF NOT EXISTS gym_progress (
+  item_key TEXT PRIMARY KEY,
+  mastery INTEGER NOT NULL DEFAULT 0,
+  streak INTEGER NOT NULL DEFAULT 0,
+  seen INTEGER NOT NULL DEFAULT 0,
+  correct INTEGER NOT NULL DEFAULT 0,
+  last_result TEXT,
+  next_review_at INTEGER,
+  updated_at TEXT DEFAULT (datetime('now','localtime'))
+);
+CREATE TABLE IF NOT EXISTS gym_attempts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_key TEXT NOT NULL,
+  drill_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  correct INTEGER NOT NULL,
+  latency_ms INTEGER NOT NULL DEFAULT 0,
+  trap TEXT,
+  created_at TEXT DEFAULT (datetime('now','localtime'))
+);
+CREATE INDEX IF NOT EXISTS idx_gym_attempts_item ON gym_attempts(item_key);
+CREATE INDEX IF NOT EXISTS idx_gym_attempts_time ON gym_attempts(created_at);
 `;
 
 function migrate(d: DatabaseSync) {

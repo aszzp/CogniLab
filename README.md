@@ -32,6 +32,17 @@ python3 scripts/finals/doc-tables.py     # 把五套卷的题目回填进命题�
 
 命题依据、蓝图与五套卷的考点分布见 `docs/05-决赛命题分析与模拟卷设计.md`。
 
+## 实操道场
+
+`/gym`：把决赛 51–57 题拆成 7 张「决策卡」，另配 10 个函数惯用法。每张卡先看一句话、心智模型和三个坑，再用分幕可视化做「先预测、再揭示」，最后用单选、填空、代码填空判题和 AI 教练点评练到条件反射。进度按连续答对次数记掌握度（0–5），并按 10 分钟 → 1 天 → 3 天 → 7 天 → 14 天安排复习；「今日速练」按到期和薄弱程度混合出 10 题。
+
+```bash
+node scripts/gym/check.mjs               # 内容体检：结构、空位、参考解实跑
+node scripts/gym/check.mjs --skip-judge  # 只做结构校验
+```
+
+内容源在 `src/lib/gym/items/*.ts`，新增卡片后跑一次体检；代码题由 `judgeProblem` 在独立进程里按 5 秒 / 128MB 判分。
+
 ## 功能
 
 | 模块 | 说明 |
@@ -44,6 +55,7 @@ python3 scripts/finals/doc-tables.py     # 把五套卷的题目回填进命题�
 | 模拟考试 | 全真 45 题 90 分钟（按官方样卷结构组题）/ 快速 20 题 / 冲刺 10 题，计时、答题卡、自动判分、模块分布、逐题回顾 |
 | 实操训练 | ①SQL（结果集自动判分）②Python（pandas+sklearn 八检查点判分）③BI 图表配置（ECharts 实时预览+判分）④流程图判定填空 ⑤数字人方案设计（AI 按 rubric 批改） |
 | 决赛模拟 | 5 套模拟卷（单选 50 + 函数模板编程 7）；编程题在独立 Python 进程里逐测试点判分（5 秒 / 128MB），自测只跑样例、提交按全真或练习口径反馈 |
+| 实操道场 | 7 张决策卡 + 10 个函数惯用法：分幕可视化（先预测再揭示）、单选/填空/代码填空判题/AI 教练点评、掌握度与间隔复习、今日速练 |
 | 坤哥助手 | 全局悬浮 AI 管家：工具调用（练习统计/错题/考纲/题库检索/出题入库）、页面上下文感知、选中文字「问坤哥」引用提问、对话历史本地保存 |
 | AI 出题 | 「我的」页按模块生成新题，预览后一键入库 |
 | 模型配置 | 「我的」页：双供应商（阿里云 Coding Plan / 智谱 ZCode）、按用途分配模型（解析/批改/出题/动画/坤哥）、深度思考开关、Key 掩码存储于本地 DB |
@@ -51,10 +63,10 @@ python3 scripts/finals/doc-tables.py     # 把五套卷的题目回填进命题�
 ## 目录结构
 
 ```
-src/lib        db(node:sqlite) / srs / ai(DashScope流式) / stats / quiz / python-judge.mjs(决赛编程题判题内核) / finals-content、finals-store(决赛卷面与作答)
-src/app        页面 + API 路由（attempts、exam、ai/explain|grade|quiz、run/sql|python、finals/start|attempt|judge|practice）
-src/components 刷题会话 / 考试答题器 / 五类实操训练器 / finals(决赛答题页、编程题工作台、成绩页)
-scripts        parse_sample.py(官方样题解析) / gen_tasks.py(实操任务生成) / seed.mjs / finals(build.py 组卷、check.mjs 体检、problems/ 编程题源文件)
+src/lib        db(node:sqlite) / srs / ai(DashScope流式) / stats / quiz / python-judge.mjs(决赛编程题判题内核) / finals-content、finals-store(决赛卷面与作答) / gym(道场内容、掌握度存储、判分)
+src/app        页面 + API 路由（attempts、exam、ai/explain|grade|quiz、run/sql|python、finals/start|attempt|judge|practice、gym/attempt|run|ai）
+src/components 刷题会话 / 考试答题器 / 五类实操训练器 / finals(决赛答题页、编程题工作台、成绩页) / gym(道场清单、主题页、可视化、练习)
+scripts        parse_sample.py(官方样题解析) / gen_tasks.py(实操任务生成) / seed.mjs / finals(build.py 组卷、check.mjs 体检、problems/ 编程题源文件) / gym/check.mjs
 data           seed-*.json（题源）、cognilab.db（运行数据）、finals(命题蓝图、理论题源文件、生成的卷面)
 ```
 

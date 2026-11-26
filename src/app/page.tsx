@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Zap, BookOpen, Timer, Flame, Target, TrendingUp, ChevronRight, BarChart3, ChartColumn, Trophy } from 'lucide-react';
+import { Zap, BookOpen, Timer, Flame, Target, TrendingUp, ChevronRight, BarChart3, ChartColumn, Trophy, Dumbbell } from 'lucide-react';
 import {
   moduleStats, dueCount, streakDays, weekActivity, totalAttempts, overallAccuracy, daysToExam,
 } from '@/lib/stats';
@@ -68,6 +68,18 @@ export default function Home() {
         <p className="flex-1 text-sm">
           <span className="font-semibold text-cyan-200">决赛模拟</span>
           <span className="ml-1 text-zinc-400">57 题 · 100 分 · 180 分钟 · 编程题自动判分</span>
+        </p>
+        <ChevronRight size={16} className="shrink-0 text-zinc-500" />
+      </Link>
+
+      {/* 实操道场：七式 + 惯用法，先看懂再速练 */}
+      <Link href="/gym" className="card flex items-center gap-3 border-violet-400/25 bg-violet-400/[0.06] p-4">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-400/15">
+          <Dumbbell size={17} className="text-violet-300" />
+        </span>
+        <p className="flex-1 text-sm">
+          <span className="font-semibold text-violet-200">实操道场</span>
+          <span className="ml-1 text-zinc-400">7 式 + 10 惯用法 · 可视化 + 速练</span>
         </p>
         <ChevronRight size={16} className="shrink-0 text-zinc-500" />
       </Link>

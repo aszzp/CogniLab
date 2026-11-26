@@ -1,0 +1,39 @@
+services:
+  cognilab:
+    build:
+      context: .
+      # 该 ECS 的 Docker 默认 bridge 无法解析阿里云内网 DNS，构建时借用宿主机网络。
+      network: host
+    container_name: cognilab
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    # 宿主机 Docker bridge 无法使用阿里云内网 DNS；共享宿主网络并只绑定回环，
+    # 由宿主机 Nginx 反代 127.0.0.1:3001。
+    network_mode: host
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      HOSTNAME: 127.0.0.1
+      TZ: Asia/Shanghai
+      COGNILAB_PYTHON: python3
+      NODE_OPTIONS: --max-old-space-size=512
+    volumes:
+      - ./data:/app/data
+    mem_limit: 800m
+    memswap_limit: 1100m
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
