@@ -59,11 +59,38 @@ function setMsgs(next: Msg[] | ((prev: Msg[]) => Msg[])) {
   for (const listener of storeListeners) listener();
 }
 
+type KunProvider = 'g4' | 'zhipu';
+const PROVIDER_KEY = 'kun_provider_v1';
+const PROVIDER_LABEL: Record<KunProvider, string> = { g4: 'DeepSeek', zhipu: 'ZCode' };
+const PROVIDER_HINT: Record<KunProvider, string> = { g4: 'G4 中继', zhipu: '智谱 ZCode' };
+
+// 与聊天记录相同的组件外存储：首屏用 g4，水合后切到用户上次选择。
+let storeProvider: KunProvider = 'g4';
+const providerListeners = new Set<() => void>();
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem(PROVIDER_KEY);
+    if (saved === 'g4' || saved === 'zhipu') storeProvider = saved;
+  } catch { /* ignore */ }
+}
+const subscribeProvider = (callback: () => void) => {
+  providerListeners.add(callback);
+  return () => { providerListeners.delete(callback); };
+};
+const getProvider = () => storeProvider;
+const getServerProvider = () => 'g4' as KunProvider;
+function setProvider(next: KunProvider) {
+  storeProvider = next;
+  try { localStorage.setItem(PROVIDER_KEY, next); } catch { /* ignore */ }
+  for (const listener of providerListeners) listener();
+}
+
 export default function KunChat({ askText, askSeq }: { askText: string; askSeq: number }) {
   const { open, setOpen, quote, setQuote } = useKun();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const msgs = useSyncExternalStore(subscribeMsgs, getMsgs, getServerMsgs);
+  const provider = useSyncExternalStore(subscribeProvider, getProvider, getServerProvider);
   const lastSeq = useRef(askSeq);
   const listRef = useRef<HTMLDivElement>(null);
   useEscape(open, () => setOpen(false));
@@ -104,6 +131,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
         body: JSON.stringify({
           messages: [...msgs, userMsg].map((m) => ({ role: m.role, content: m.quote ? `[引用] ${m.quote}\n\n${m.content}` : m.content })),
           page,
+          provider,
         }),
       });
       const data = await res.json();
@@ -146,6 +174,27 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
             <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-zinc-400 hover:text-white">
               <X size={17} />
             </button>
+          </div>
+
+          {/* 模型切换：DeepSeek（G4 中继）/ ZCode（智谱） */}
+          <div className="flex items-center gap-1.5 border-b border-white/8 px-4 py-2">
+            <span className="text-[10px] text-zinc-600">模型</span>
+            <div role="group" aria-label="选择坤哥模型" className="flex rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+              {(['g4', 'zhipu'] as const).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={provider === key}
+                  onClick={() => setProvider(key)}
+                  className={`rounded-md px-2.5 py-1 text-[11px] transition-colors ${
+                    provider === key ? 'bg-violet-500/30 font-medium text-white' : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {PROVIDER_LABEL[key]}
+                </button>
+              ))}
+            </div>
+            <span className="ml-auto text-[10px] text-zinc-600">{PROVIDER_HINT[provider]}</span>
           </div>
 
           {/* 消息列表 */}
@@ -193,7 +242,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                   <Loader2 size={14} className="animate-spin text-violet-300" />
-                  <span className="text-[12px] text-zinc-400">坤哥查资料 / 思考中…</span>
+                  <span className="text-[12px] text-zinc-400">{PROVIDER_LABEL[provider]} 查资料 / 思考中…</span>
                 </div>
               </div>
             )}

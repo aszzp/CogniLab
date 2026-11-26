@@ -78,11 +78,13 @@ export function saveAIConfig(cfg: AIConfig): void {
   );
 }
 
-/** 解析某用途实际使用的模型配置 */
-export function resolveModel(purpose: Purpose) {
+/** 解析某用途实际使用的模型配置；可临时指定供应商（坤哥对话框切换用） */
+export function resolveModel(purpose: Purpose, override?: { providerId?: string; model?: string }) {
   const cfg = getAIConfig();
-  const [pid, model] = (cfg.assign[purpose] || 'dashscope:qwen3.7-plus').split(':');
+  const [assignedPid, assignedModel] = (cfg.assign[purpose] || 'dashscope:qwen3.7-plus').split(':');
+  const pid = override?.providerId || assignedPid;
   const provider = cfg.providers[pid] ?? Object.values(cfg.providers)[0];
+  const model = override?.model || (pid === assignedPid ? assignedModel : provider.models[0]);
   return {
     baseUrl: provider.baseUrl,
     apiKey: provider.apiKey,

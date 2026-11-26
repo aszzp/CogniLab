@@ -14,6 +14,9 @@ export interface ToolDef {
 
 export interface ChatOptions {
   purpose?: Purpose;
+  /** 临时覆盖供应商（如坤哥对话框的 DeepSeek / ZCode 切换） */
+  providerId?: string;
+  model?: string;
   maxTokens?: number;
   temperature?: number;
   tools?: ToolDef[];
@@ -26,7 +29,10 @@ function thinkingBody(style: 'dashscope' | 'zhipu', on: boolean): Record<string,
 }
 
 async function call(messages: ChatMessage[], opts: ChatOptions, stream: boolean): Promise<Response> {
-  const cfg = resolveModel(opts.purpose ?? 'explain');
+  const cfg = resolveModel(
+    opts.purpose ?? 'explain',
+    opts.providerId || opts.model ? { providerId: opts.providerId, model: opts.model } : undefined,
+  );
   if (!cfg.apiKey) throw new Error('模型 API Key 未配置（我的 → 模型配置）');
   const body: Record<string, unknown> = {
     model: cfg.model,

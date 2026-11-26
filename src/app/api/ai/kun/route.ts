@@ -132,7 +132,9 @@ function runTool(name: string, args: Record<string, unknown>): { result: string;
   }
 }
 
-async function generateQuestions(topic: string, count: number, save: boolean): Promise<{ result: string; summary: string }> {
+async function generateQuestions(
+  topic: string, count: number, save: boolean, providerId?: string,
+): Promise<{ result: string; summary: string }> {
   const n = Math.min(Math.max(count || 5, 1), 10);
   const sys =
     '你是"人工智能数字人训练师"赛项命题专家，对标三级/高级工难度。只输出 JSON 数组：' +
@@ -143,7 +145,7 @@ async function generateQuestions(topic: string, count: number, save: boolean): P
         { role: 'system', content: sys },
         { role: 'user', content: `围绕「${topic}」出 ${n} 道题（single 与 judge 搭配），并标注每题所属模块（职业道德/数字人/业务分析/智能训练/系统设计）。` },
       ],
-      { purpose: 'quiz', maxTokens: 3000 },
+      { purpose: 'quiz', maxTokens: 3000, providerId },
     );
     const list = extractJsonArray<GenQ>(content)?.filter((q) => q.stem && q.options && q.answer) ?? [];
     if (!list.length) return { result: JSON.stringify({ error: '生成失败' }), summary: '生成失败' };
@@ -158,7 +160,9 @@ async function generateQuestions(topic: string, count: number, save: boolean): P
 }
 
 export async function POST(req: Request) {
-  const { messages, page } = await req.json();
+  const { messages, page, provider } = await req.json();
+  // 坤哥对话框只允许在 DeepSeek 中继与 ZCode 之间切换，其他值回落到用途默认配置。
+  const providerId = provider === 'g4' || provider === 'zhipu' ? provider : undefined;
   const history = (messages ?? []).slice(-16) as ChatMessage[];
 
   const system =
@@ -180,9 +184,11 @@ export async function POST(req: Request) {
   const trace: Trace[] = [];
   try {
     for (let round = 0; round < 5; round++) {
-      const { content, toolCalls } = await chat(convo, { purpose: 'kun', maxTokens: 1600, temperature: 0.6, tools: TOOLS });
+      const { content, toolCalls } = await chat(convo, {
+        purpose: 'kun', maxTokens: 1600, temperature: 0.6, tools: TOOLS, providerId,
+      });
       if (!toolCalls?.length) {
-        return NextResponse.json({ content, trace });
+        return NextResponse.json({ content, trace, provider: providerId ?? 'default' });
       }
       convo.push({ role: 'assistant', content: content ?? '', tool_calls: toolCalls });
       for (const tc of toolCalls) {
@@ -190,15 +196,15 @@ export async function POST(req: Request) {
         try { args = JSON.parse(tc.function.arguments || '{}'); } catch { /* ignore */ }
         let out = runTool(tc.function.name, args);
         if (out.result === 'ASYNC') {
-          out = await generateQuestions(String(args.topic ?? ''), Number(args.count) || 5, args.save === true);
+          out = await generateQuestions(String(args.topic ?? ''), Number(args.count) || 5, args.save === true, providerId);
         }
         trace.push({ name: tc.function.name, args: tc.function.arguments, summary: out.summary });
         convo.push({ role: 'tool', content: out.result.slice(0, 4000), tool_call_id: tc.id });
       }
     }
     // 工具轮次耗尽，强制收尾
-    const { content } = await chat(convo, { purpose: 'kun', maxTokens: 1600 });
-    return NextResponse.json({ content, trace });
+    const { content } = await chat(convo, { purpose: 'kun', maxTokens: 1600, providerId });
+    return NextResponse.json({ content, trace, provider: providerId ?? 'default' });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 502 });
   }

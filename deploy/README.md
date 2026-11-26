@@ -31,6 +31,10 @@ G4_BASE_URL=https://47.109.176.71/llm/v1
 `https://g4pro.eastzzp.cn/llm/v1`（需连 VPN）。中继端点
 `/v1/models` 与 `/v1/chat/completions` 都要求 `Authorization: Bearer <key>`。
 
+坤哥对话框顶部可在 **DeepSeek（G4 中继）** 与 **ZCode（智谱）** 之间一键切换；
+选择会保存在浏览器本地，并只覆盖本次坤哥请求的供应商，不改「我的 → 模型配
+置」里的全局用途分配。
+
 ## 目录布局
 
 ```
