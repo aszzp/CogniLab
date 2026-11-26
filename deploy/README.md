@@ -15,6 +15,22 @@ Vaultwarden / OpenVPN / G4 中继站点。
 - 注意：`eastzzp.cn` 与 `nip.io` 未备案，阿里云会返回 403 并重置 HTTPS，
   不能作为公网入口；`cognilab.eastzzp.cn` 的临时 A 记录已删除。
 
+## AI 中继（阿里云）
+
+阿里云容器不能访问 `g4pro.eastzzp.cn` 对应的 VPN 内网地址；G4 供应商必须走
+服务器上的公网中继：
+
+```bash
+# /opt/cognilab/.env
+G4_BASE_URL=https://47.109.176.71/llm/v1
+# G4_API_KEY 从服务器 /etc/g4-temp-qwen-relay/client.key 读取（去掉换行），
+# 不要直接复制本地 .env.local 里的旧 key。
+```
+
+本地开发仍可在 `.env.local` 中把 `G4_BASE_URL` 指向
+`https://g4pro.eastzzp.cn/llm/v1`（需连 VPN）。中继端点
+`/v1/models` 与 `/v1/chat/completions` 都要求 `Authorization: Bearer <key>`。
+
 ## 目录布局
 
 ```

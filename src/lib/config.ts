@@ -35,7 +35,9 @@ export const DEFAULT_CONFIG: AIConfig = {
     },
     g4: {
       name: 'G4 中继 DeepSeek',
-      baseUrl: 'https://g4pro.eastzzp.cn/llm/v1',
+      // 本地开发默认走 VPN 域名；阿里云部署用 G4_BASE_URL 指向公网中继，
+      // 不能再让服务器去访问 10.89.241.10 的 VPN 内网地址。
+      baseUrl: process.env.G4_BASE_URL || 'https://g4pro.eastzzp.cn/llm/v1',
       apiKey: process.env.G4_API_KEY || '',
       models: ['deepseek-v4.1-flash-1017'],
       thinkingStyle: 'dashscope',
