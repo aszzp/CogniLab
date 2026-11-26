@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, Code2, Flag, Loader2, RotateCcw, Sparkles, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Code2, Flag, Loader2, RotateCcw, Sparkles, Timer, XCircle } from 'lucide-react';
 import DrillCard from './DrillCard';
 import type { GymDrill, GymProgress } from '@/lib/gym/types';
 
@@ -13,6 +13,10 @@ export interface DrillEntry {
   itemTitle: string;
   kind: 'pattern' | 'idiom';
   drill: GymDrill;
+}
+
+function formatSeconds(total: number) {
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
 export default function GymDrillSession({
@@ -29,6 +33,13 @@ export default function GymDrillSession({
   const [round, setRound] = useState(0);
   const [results, setResults] = useState<Map<string, boolean>>(new Map());
   const [review, setReview] = useState({ loading: false, text: '', error: '' });
+  const [elapsed, setElapsed] = useState(0);
+  const [finishedElapsed, setFinishedElapsed] = useState<number | null>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setElapsed((seconds) => seconds + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const done = idx >= entries.length;
   const current = entries[idx];
@@ -42,6 +53,7 @@ export default function GymDrillSession({
   }
 
   function next() {
+    if (idx + 1 >= entries.length) setFinishedElapsed(elapsed);
     setIdx((i) => Math.min(entries.length, i + 1));
   }
 
@@ -50,6 +62,8 @@ export default function GymDrillSession({
     setRound((r) => r + 1);
     setResults(new Map());
     setReview({ loading: false, text: '', error: '' });
+    setElapsed(0);
+    setFinishedElapsed(null);
   }
 
   function jumpTo(drillId: string) {
@@ -58,6 +72,8 @@ export default function GymDrillSession({
     setIdx(at);
     setRound((r) => r + 1);
     setReview({ loading: false, text: '', error: '' });
+    setElapsed(0);
+    setFinishedElapsed(null);
   }
 
   async function aiReview() {
@@ -106,6 +122,9 @@ export default function GymDrillSession({
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-cyan-400" style={{ width: `${percent}%` }} />
           </div>
+          <p className="mt-2 flex items-center justify-center gap-1 text-[10.5px] text-zinc-500">
+            <Timer size={11} /> 本轮用时 {formatSeconds(finishedElapsed ?? elapsed)}
+          </p>
         </div>
 
         {wrong.length > 0 && (
@@ -171,6 +190,9 @@ export default function GymDrillSession({
             <div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-cyan-400 transition-all" style={{ width: `${((idx) / entries.length) * 100}%` }} />
           </div>
         </div>
+        <span className="flex shrink-0 items-center gap-0.5 text-[10px] tabular-nums text-zinc-500">
+          <Timer size={10} /> {formatSeconds(elapsed)}
+        </span>
         <span className="hidden shrink-0 text-[10px] text-zinc-600 sm:block">
           <CheckCircle2 size={11} className="mr-0.5 inline text-emerald-400" />{correctCount} 对
           <span className="ml-1.5 text-zinc-600">{pythonLabel}</span>

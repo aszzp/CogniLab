@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowRight, Brain, CheckCircle2, ChevronRight, Dumbbell, Flame, Play, Timer,
+  ArrowRight, Brain, CheckCircle2, ChevronRight, Code2, Dumbbell, Flame, Play, Timer, Zap,
 } from 'lucide-react';
 import type { GymListItem } from '@/lib/gym/content';
 import type { GymProgress } from '@/lib/gym/types';
@@ -75,7 +75,7 @@ export default function GymList({
         <div className="min-w-0">
           <h1 className="text-lg font-bold">实操道场</h1>
           <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
-            7 个业务模板 + 10 个函数惯用法。先看懂一张卡，再用单选、填空、代码和 AI 点评练到条件反射。
+            7 个业务模板 + 10 个函数惯用法。先看懂一张卡，再用可视化走一遍、代码冲刺和 AI 点评练到条件反射。
           </p>
         </div>
       </div>
@@ -107,6 +107,22 @@ export default function GymList({
           <span className="block text-[11.5px] text-zinc-500">按到期和薄弱程度混合出题，约 5 分钟</span>
         </span>
         <ArrowRight size={16} className="text-violet-300" />
+      </Link>
+
+      <Link
+        href="/gym/p1-critical-path?tab=sprint"
+        className="card flex items-center gap-3 border-cyan-400/25 bg-cyan-400/[0.05] p-4 transition-colors hover:border-cyan-400/40"
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cyan-400/15 text-cyan-200">
+          <Zap size={18} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-100">
+            代码冲刺 · 关键路径 <span className="rounded-full border border-cyan-400/25 px-1.5 py-0.5 text-[9px] font-normal text-cyan-200">NEW</span>
+          </span>
+          <span className="block text-[11.5px] text-zinc-500">从零写 → 计时 → 连续 AC；每轮随机抽 3 个用例</span>
+        </span>
+        <Code2 size={16} className="text-cyan-300" />
       </Link>
 
       <div className="flex gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs">
@@ -188,7 +204,15 @@ function ItemRow({ item, progress, now }: { item: GymListItem; progress?: GymPro
           <MasteryBar value={progress?.mastery ?? 0} />
         </span>
       </Link>
-      <div className="flex shrink-0 items-center pr-3">
+      <div className="flex shrink-0 items-center gap-1.5 pr-3">
+        {item.kind === 'pattern' && (
+          <Link
+            href={`/gym/${item.key}?tab=sprint`}
+            className="flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.05] px-2.5 py-1.5 text-[10.5px] text-cyan-200 transition-colors hover:border-cyan-400/40"
+          >
+            <Zap size={10} /> 冲刺
+          </Link>
+        )}
         <Link
           href={`/gym/${item.key}?tab=practice`}
           className="flex items-center gap-1 rounded-full border border-white/12 px-2.5 py-1.5 text-[10.5px] text-zinc-400 transition-colors hover:border-violet-400/40 hover:text-violet-200"

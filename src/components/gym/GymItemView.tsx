@@ -2,17 +2,19 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Code2, Eye, Play, Timer, Trophy } from 'lucide-react';
-import type { GymItem, GymProgress } from '@/lib/gym/types';
+import { ArrowLeft, BookOpen, Code2, Eye, Play, Timer, Trophy, Zap } from 'lucide-react';
+import type { GymCode, GymItem, GymProgress } from '@/lib/gym/types';
 import VisualPlayer from './VisualPlayer';
 import GymDrillSession, { type DrillEntry } from './GymDrillSession';
+import CodeSprint from './CodeSprint';
 
-type Tab = 'learn' | 'visual' | 'practice';
+type Tab = 'learn' | 'visual' | 'practice' | 'sprint';
 
 const TAB_META: { key: Tab; label: string; icon: typeof BookOpen }[] = [
   { key: 'learn', label: '学习', icon: BookOpen },
   { key: 'visual', label: '可视化', icon: Eye },
   { key: 'practice', label: '练习', icon: Code2 },
+  { key: 'sprint', label: '冲刺', icon: Zap },
 ];
 
 export default function GymItemView({
@@ -23,7 +25,15 @@ export default function GymItemView({
   initialTab: Tab;
   pythonLabel: string;
 }) {
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const codeDrills = useMemo(
+    () => item.drills.filter((drill): drill is GymCode => drill.type === 'code'),
+    [item],
+  );
+  const hasCode = codeDrills.length > 0;
+  const tabs = hasCode ? TAB_META : TAB_META.filter((t) => t.key !== 'sprint');
+  const [tab, setTab] = useState<Tab>(initialTab === 'sprint' && !hasCode ? 'learn' : initialTab);
+  const [sprintId, setSprintId] = useState(() => codeDrills[0]?.id ?? '');
+  const sprintDrill = codeDrills.find((d) => d.id === sprintId) ?? codeDrills[0];
   const [local, setLocal] = useState<GymProgress | null>(progress);
   const entries: DrillEntry[] = useMemo(
     () => item.drills.map((drill) => ({
@@ -63,8 +73,8 @@ export default function GymItemView({
         </div>
       </header>
 
-      <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs">
-        {TAB_META.map(({ key, label, icon: Icon }) => (
+      <div className={`grid ${tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-3'} gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs`}>
+        {tabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             type="button"
@@ -79,23 +89,77 @@ export default function GymItemView({
         ))}
       </div>
 
-      {tab === 'learn' && <LearnTab item={item} onVisual={() => setTab('visual')} onPractice={() => setTab('practice')} />}
+      {tab === 'learn' && (
+        <LearnTab
+          item={item}
+          onVisual={() => setTab('visual')}
+          onPractice={() => setTab('practice')}
+          onSprint={hasCode ? () => setTab('sprint') : undefined}
+        />
+      )}
       {tab === 'visual' && (
         <div className="space-y-3">
           <VisualPlayer item={item} />
-          <button type="button" onClick={() => setTab('practice')} className="grad-btn flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white">
-            <Play size={15} /> 看完了，练 {item.drills.length} 道
-          </button>
+          <div className={`grid gap-2 ${hasCode ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <button type="button" onClick={() => setTab('practice')} className="grad-btn flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white">
+              <Play size={15} /> 练 {item.drills.length} 道
+            </button>
+            {hasCode && (
+              <button type="button" onClick={() => setTab('sprint')} className="flex items-center justify-center gap-2 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.06] py-3 text-sm font-semibold text-cyan-200 hover:bg-cyan-400/[0.1]">
+                <Zap size={15} /> 代码冲刺
+              </button>
+            )}
+          </div>
         </div>
       )}
       {tab === 'practice' && (
-        <GymDrillSession
-          entries={entries}
-          pythonLabel={pythonLabel}
-          onProgress={setLocal}
-          finishHref="/gym"
-          finishLabel="回到道场"
-        />
+        <div className="space-y-3">
+          {hasCode && (
+            <button type="button" onClick={() => setTab('sprint')} className="card flex w-full items-center gap-3 border-cyan-400/25 bg-cyan-400/[0.05] p-3 text-left transition-colors hover:border-cyan-400/40">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-400/15 text-cyan-200"><Zap size={15} /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[12.5px] font-semibold text-cyan-100">代码冲刺 · 从零写 5 轮</span>
+                <span className="block text-[10.5px] text-zinc-500">计时 · 随机 3 个用例 · 连续 AC</span>
+              </span>
+              <span className="text-[10px] text-cyan-300">去冲刺 →</span>
+            </button>
+          )}
+          <GymDrillSession
+            entries={entries}
+            pythonLabel={pythonLabel}
+            onProgress={setLocal}
+            finishHref="/gym"
+            finishLabel="回到道场"
+          />
+        </div>
+      )}
+      {tab === 'sprint' && hasCode && sprintDrill && (
+        <div className="space-y-3">
+          {codeDrills.length > 1 && (
+            <div className="flex gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/[0.03] p-1">
+              {codeDrills.map((drill) => (
+                <button
+                  key={drill.id}
+                  type="button"
+                  aria-pressed={sprintDrill.id === drill.id}
+                  onClick={() => setSprintId(drill.id)}
+                  className={`shrink-0 rounded-lg px-2.5 py-1.5 font-mono text-[10.5px] transition-colors ${
+                    sprintDrill.id === drill.id ? 'bg-cyan-500/20 text-cyan-100' : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {drill.fn}
+                </button>
+              ))}
+            </div>
+          )}
+          <CodeSprint
+            key={sprintDrill.id}
+            item={item}
+            drill={sprintDrill}
+            pythonLabel={pythonLabel}
+            onProgress={setLocal}
+          />
+        </div>
       )}
     </div>
   );
@@ -115,7 +179,14 @@ function Mastery({ value }: { value: number }) {
   );
 }
 
-function LearnTab({ item, onVisual, onPractice }: { item: GymItem; onVisual: () => void; onPractice: () => void }) {
+function LearnTab({
+  item, onVisual, onPractice, onSprint,
+}: {
+  item: GymItem;
+  onVisual: () => void;
+  onPractice: () => void;
+  onSprint?: () => void;
+}) {
   return (
     <div className="space-y-3">
       <section className="card border-violet-400/20 bg-violet-400/[0.05] p-4">
@@ -179,6 +250,11 @@ function LearnTab({ item, onVisual, onPractice }: { item: GymItem; onVisual: () 
           <Play size={14} /> 开始练习
         </button>
       </div>
+      {onSprint && (
+        <button type="button" onClick={onSprint} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.05] py-2.5 text-[12px] font-semibold text-cyan-200 hover:bg-cyan-400/[0.1]">
+          <Zap size={14} /> 代码冲刺 · 从零写 5 轮
+        </button>
+      )}
     </div>
   );
 }

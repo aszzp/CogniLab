@@ -16,12 +16,12 @@ export default async function GymItemPage({
   const item = findGymItem(slug);
   if (!item) notFound();
   const { tab } = await searchParams;
-  const initialTab = tab === 'practice' ? 'practice' : tab === 'visual' ? 'visual' : 'learn';
+  const initialTab = tab === 'practice' ? 'practice' : tab === 'visual' ? 'visual' : tab === 'sprint' ? 'sprint' : 'learn';
   const progress = gymProgress(item.key) ?? null;
   const version = await pythonVersion();
   return (
     <GymItemView
-      key={initialTab}
+      key={`${item.key}-${initialTab}`}
       item={item}
       progress={progress}
       initialTab={initialTab}

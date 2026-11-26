@@ -54,7 +54,11 @@ G4_BASE_URL=https://47.109.176.71/llm/v1
 
 ```bash
 npm ci
-NEXT_TELEMETRY_DISABLED=1 npm run build
+# layout 用 next/font/google 的 Geist；本机直连字体源被重置时让构建走代理。
+# 网络正常时可去掉 HTTPS_PROXY/NODE_USE_ENV_PROXY/NODE_OPTIONS。
+HTTPS_PROXY=http://127.0.0.1:7891 HTTP_PROXY=http://127.0.0.1:7891 \
+  NODE_USE_ENV_PROXY=1 NODE_OPTIONS=--use-env-proxy \
+  NEXT_TELEMETRY_DISABLED=1 npm run build
 mkdir -p /tmp/cognilab-bundle/app
 cp -R .next/standalone/. /tmp/cognilab-bundle/app/
 mkdir -p /tmp/cognilab-bundle/app/.next
