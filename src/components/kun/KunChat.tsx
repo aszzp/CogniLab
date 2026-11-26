@@ -30,6 +30,8 @@ interface Msg {
   content: string;
   quote?: string;
   trace?: { name: string; summary: string }[];
+  /** 仅流式输出期间为 true；不写入 localStorage */
+  streaming?: boolean;
 }
 
 const STORE_KEY = 'kun_chat_v1';
@@ -51,11 +53,16 @@ const subscribeMsgs = (callback: () => void) => {
 };
 const getMsgs = () => storeMsgs;
 const getServerMsgs = () => EMPTY_MSGS;
-function setMsgs(next: Msg[] | ((prev: Msg[]) => Msg[])) {
+function setMsgs(next: Msg[] | ((prev: Msg[]) => Msg[]), persist = true) {
   storeMsgs = typeof next === 'function' ? next(storeMsgs) : next;
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(storeMsgs.slice(-40)));
-  } catch { /* ignore */ }
+  if (persist) {
+    try {
+      const saved = storeMsgs.slice(-40).map((m) => ({
+        role: m.role, content: m.content, quote: m.quote, trace: m.trace,
+      }));
+      localStorage.setItem(STORE_KEY, JSON.stringify(saved));
+    } catch { /* ignore */ }
+  }
   for (const listener of storeListeners) listener();
 }
 
@@ -89,6 +96,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
   const { open, setOpen, quote, setQuote } = useKun();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<'idle' | 'thinking' | 'streaming'>('idle');
   const msgs = useSyncExternalStore(subscribeMsgs, getMsgs, getServerMsgs);
   const provider = useSyncExternalStore(subscribeProvider, getProvider, getServerProvider);
   const lastSeq = useRef(askSeq);
@@ -113,9 +121,10 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
     if (!content || loading) return;
     setInput('');
     setQuote('');
+    setLoading(true);
+    setPhase('thinking');
     const userMsg: Msg = { role: 'user', content, quote: q || undefined };
     setMsgs((m) => [...m, userMsg]);
-    setLoading(true);
 
     // 收集当前页面上下文
     const page = {
@@ -123,6 +132,35 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
       title: document.title,
       text: (document.querySelector('main')?.innerText ?? '').slice(0, 1500),
     };
+
+    let assistant = '';
+    let traces: { name: string; summary: string }[] = [];
+    let finalized = false;
+    let lastPaint = 0;
+
+    const paint = (persist = false, force = false) => {
+      const now = Date.now();
+      if (!persist && !force && now - lastPaint < 60) return;
+      lastPaint = now;
+      setMsgs((m) => m.map((msg) => (msg.streaming ? {
+        ...msg,
+        content: assistant,
+        trace: traces.length ? traces : undefined,
+      } : msg)), persist);
+    };
+
+    const finalize = () => {
+      if (finalized) return;
+      finalized = true;
+      setMsgs((m) => m.map((msg) => (msg.streaming ? {
+        ...msg,
+        content: assistant || '（坤哥走神了，再问一次）',
+        trace: traces.length ? traces : undefined,
+        streaming: false,
+      } : msg)), true);
+    };
+
+    setMsgs((m) => [...m, { role: 'assistant', content: '', streaming: true }], false);
 
     try {
       const res = await fetch('/api/ai/kun', {
@@ -134,15 +172,85 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
           provider,
         }),
       });
-      const data = await res.json();
-      setMsgs((m) => [
-        ...m,
-        { role: 'assistant', content: data.content || data.error || '（坤哥走神了，再问一次）', trace: data.trace },
-      ]);
-    } catch {
-      setMsgs((m) => [...m, { role: 'assistant', content: '⚠️ 网络异常，请重试' }]);
+      if (!res.ok) {
+        let message = `请求失败（${res.status}）`;
+        try {
+          const data = await res.json() as { error?: string };
+          if (data?.error) message = String(data.error);
+        } catch { /* ignore */ }
+        throw new Error(message);
+      }
+      if (!res.body) throw new Error('浏览器未收到流式响应');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let sawDone = false;
+      const handle = (payload: string) => {
+        let ev: {
+          type?: string;
+          text?: string;
+          content?: string;
+          error?: string;
+          trace?: { name?: string; summary?: string } | { name?: string; summary?: string }[];
+        };
+        try {
+          ev = JSON.parse(payload);
+        } catch {
+          return;
+        }
+        if (ev.type === 'delta') {
+          assistant += ev.text ?? '';
+          setPhase('streaming');
+          paint();
+        } else if (ev.type === 'status') {
+          setPhase('thinking');
+        } else if (ev.type === 'trace') {
+          if (ev.trace && !Array.isArray(ev.trace) && ev.trace.summary) {
+            traces = [...traces, { name: String(ev.trace.name ?? '工具'), summary: String(ev.trace.summary) }];
+            paint(false, true);
+          }
+        } else if (ev.type === 'done') {
+          if (ev.content) assistant = ev.content;
+          if (Array.isArray(ev.trace)) {
+            traces = ev.trace
+              .map((t) => ({ name: String(t.name ?? '工具'), summary: String(t.summary ?? '') }))
+              .filter((t) => t.summary);
+          }
+          sawDone = true;
+          setPhase('idle');
+          finalize();
+        } else if (ev.type === 'error') {
+          throw new Error(ev.error || '流式请求失败');
+        }
+      };
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split(/\r?\n\r?\n/);
+        buffer = parts.pop() ?? '';
+        for (const part of parts) {
+          const line = part.split(/\r?\n/).find((l) => l.startsWith('data:'));
+          const payload = line?.slice(5).trim();
+          if (payload) handle(payload);
+        }
+      }
+      const tail = buffer.split(/\r?\n/).find((l) => l.startsWith('data:'));
+      const tailPayload = tail?.slice(5).trim();
+      if (tailPayload) handle(tailPayload);
+      if (!sawDone) {
+        if (!assistant) throw new Error('流式响应意外中断');
+        finalize();
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      assistant = assistant ? `${assistant}\n\n⚠️ ${message}` : `⚠️ ${message}`;
+      finalize();
     } finally {
       setLoading(false);
+      setPhase('idle');
     }
   }
 
@@ -165,8 +273,9 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
             </div>
             {msgs.length > 0 && (
               <button
-                onClick={() => { if (confirm('清空与坤哥的对话？')) setMsgs([]); }}
-                className="rounded-lg px-2 py-1 text-[11px] text-zinc-500 hover:text-zinc-300"
+                onClick={() => { if (!loading && confirm('清空与坤哥的对话？')) setMsgs([]); }}
+                disabled={loading}
+                className="rounded-lg px-2 py-1 text-[11px] text-zinc-500 hover:text-zinc-300 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 清空
               </button>
@@ -186,7 +295,8 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
                   type="button"
                   aria-pressed={provider === key}
                   onClick={() => setProvider(key)}
-                  className={`rounded-md px-2.5 py-1 text-[11px] transition-colors ${
+                  disabled={loading}
+                  className={`rounded-md px-2.5 py-1 text-[11px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                     provider === key ? 'bg-violet-500/30 font-medium text-white' : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
@@ -198,7 +308,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
           </div>
 
           {/* 消息列表 */}
-          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-3.5 py-3">
+          <div ref={listRef} aria-live="polite" aria-busy={loading} className="flex-1 space-y-3 overflow-y-auto px-3.5 py-3">
             {msgs.length === 0 && (
               <div className="mt-6 space-y-3 px-2 text-center">
                 <p className="text-2xl">👋</p>
@@ -225,7 +335,14 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
                   )}
                   {m.role === 'user'
                     ? <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed">{m.content}</p>
-                    : <Markdown>{m.content}</Markdown>}
+                    : (
+                      <>
+                        <Markdown>{m.content || ' '}</Markdown>
+                        {m.streaming && (
+                          <span aria-hidden className="ml-0.5 inline-block h-3.5 w-[3px] animate-pulse rounded-full bg-violet-300 align-middle" />
+                        )}
+                      </>
+                    )}
                   {m.trace && m.trace.length > 0 && (
                     <div className="mt-2 space-y-1 border-t border-white/8 pt-2">
                       {m.trace.map((t, j) => (
@@ -238,7 +355,7 @@ export default function KunChat({ askText, askSeq }: { askText: string; askSeq: 
                 </div>
               </div>
             ))}
-            {loading && (
+            {loading && phase === 'thinking' && (
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                   <Loader2 size={14} className="animate-spin text-violet-300" />

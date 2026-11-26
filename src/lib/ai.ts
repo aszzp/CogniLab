@@ -83,6 +83,84 @@ export async function chat(
   return { content: m.content ?? '', toolCalls: m.tool_calls, raw: m as ChatMessage };
 }
 
+export type ChatStreamEvent =
+  | { type: 'delta'; text: string }
+  | { type: 'done'; content: string; toolCalls?: ChatMessage['tool_calls'] };
+
+/** 流式（带工具调用）：逐个产出文本增量，结束时给出完整内容与聚合后的 tool_calls */
+export async function* chatStreamEvents(
+  messages: ChatMessage[],
+  opts: ChatOptions = {},
+): AsyncGenerator<ChatStreamEvent> {
+  const res = await call(messages, opts, true);
+  if (!res.body) throw new Error('模型未返回流式响应');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  let content = '';
+  const toolMap = new Map<number, NonNullable<ChatMessage['tool_calls']>[number]>();
+
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() ?? '';
+      for (const line of lines) {
+        const t = line.trim();
+        if (!t.startsWith('data:')) continue;
+        const payload = t.slice(5).trim();
+        if (!payload || payload === '[DONE]') continue;
+        let j: {
+          choices?: {
+            delta?: {
+              content?: string | null;
+              tool_calls?: {
+                index?: number;
+                id?: string;
+                type?: string;
+                function?: { name?: string; arguments?: string };
+              }[];
+            };
+          }[];
+        };
+        try {
+          j = JSON.parse(payload);
+        } catch {
+          continue;
+        }
+        const delta = j.choices?.[0]?.delta;
+        if (!delta) continue;
+        if (typeof delta.content === 'string' && delta.content) {
+          content += delta.content;
+          yield { type: 'delta', text: delta.content };
+        }
+        for (const part of delta.tool_calls ?? []) {
+          const idx = part.index ?? 0;
+          const cur = toolMap.get(idx) ?? {
+            id: '',
+            type: 'function' as const,
+            function: { name: '', arguments: '' },
+          };
+          if (part.id) cur.id = part.id;
+          if (part.function?.name) cur.function.name += part.function.name;
+          if (part.function?.arguments) cur.function.arguments += part.function.arguments;
+          toolMap.set(idx, cur);
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const toolCalls = [...toolMap.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([, v]) => v)
+    .filter((v) => v.function.name);
+  yield { type: 'done', content, toolCalls: toolCalls.length ? toolCalls : undefined };
+}
+
 /** 流式：把 SSE 转为纯文本 ReadableStream（仅用于无工具调用的场景） */
 export async function chatStream(messages: ChatMessage[], opts: ChatOptions = {}): Promise<ReadableStream<Uint8Array>> {
   const res = await call(messages, { ...opts, tools: undefined }, true);

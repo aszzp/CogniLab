@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { qAll } from '@/lib/db';
-import { chat, extractJsonArray, type ChatMessage, type ToolDef } from '@/lib/ai';
+import { chat, chatStreamEvents, extractJsonArray, type ChatMessage, type ToolDef } from '@/lib/ai';
 import { moduleStats, totalAttempts, overallAccuracy, streakDays, dueCount } from '@/lib/stats';
 import { dueReview } from '@/lib/quiz';
 import { insertQuestions, type GenQ } from '@/lib/quizgen';
@@ -160,10 +160,16 @@ async function generateQuestions(
 }
 
 export async function POST(req: Request) {
-  const { messages, page, provider } = await req.json();
+  let body: { messages?: unknown; page?: { route?: string; title?: string; text?: string }; provider?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: '请求体必须是 JSON' }, { status: 400 });
+  }
+  const { messages, page, provider } = body;
   // 坤哥对话框只允许在 DeepSeek 中继与 ZCode 之间切换，其他值回落到用途默认配置。
   const providerId = provider === 'g4' || provider === 'zhipu' ? provider : undefined;
-  const history = (messages ?? []).slice(-16) as ChatMessage[];
+  const history = (Array.isArray(messages) ? messages : []).slice(-16) as ChatMessage[];
 
   const system =
     '你是"坤哥"，CogniLab 数字人训练师备赛系统的 AI 学习管家。用户正在备战 2026 年 10 月中旬的省级选拔赛' +
@@ -181,31 +187,82 @@ export async function POST(req: Request) {
     ...history.map((m) => ({ role: m.role, content: m.content ?? '' })),
   ];
 
-  const trace: Trace[] = [];
-  try {
-    for (let round = 0; round < 5; round++) {
-      const { content, toolCalls } = await chat(convo, {
-        purpose: 'kun', maxTokens: 1600, temperature: 0.6, tools: TOOLS, providerId,
-      });
-      if (!toolCalls?.length) {
-        return NextResponse.json({ content, trace, provider: providerId ?? 'default' });
-      }
-      convo.push({ role: 'assistant', content: content ?? '', tool_calls: toolCalls });
-      for (const tc of toolCalls) {
-        let args: Record<string, unknown> = {};
-        try { args = JSON.parse(tc.function.arguments || '{}'); } catch { /* ignore */ }
-        let out = runTool(tc.function.name, args);
-        if (out.result === 'ASYNC') {
-          out = await generateQuestions(String(args.topic ?? ''), Number(args.count) || 5, args.save === true, providerId);
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let closed = false;
+      const send = (event: unknown) => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+        } catch {
+          closed = true;
         }
-        trace.push({ name: tc.function.name, args: tc.function.arguments, summary: out.summary });
-        convo.push({ role: 'tool', content: out.result.slice(0, 4000), tool_call_id: tc.id });
+      };
+      const trace: Trace[] = [];
+      const heartbeat = setInterval(() => send({ type: 'ping' }), 15000);
+      try {
+        let full = '';
+        for (let round = 0; round < 5; round++) {
+          let roundContent = '';
+          let toolCalls: ChatMessage['tool_calls'];
+          for await (const ev of chatStreamEvents(convo, {
+            purpose: 'kun', maxTokens: 1600, temperature: 0.6, tools: TOOLS, providerId, signal: req.signal,
+          })) {
+            if (ev.type === 'delta') {
+              full += ev.text;
+              send({ type: 'delta', text: ev.text });
+            } else {
+              roundContent = ev.content;
+              toolCalls = ev.toolCalls;
+            }
+          }
+          if (!toolCalls?.length) {
+            send({ type: 'done', content: full, trace, provider: providerId ?? 'default' });
+            return;
+          }
+          convo.push({ role: 'assistant', content: roundContent, tool_calls: toolCalls });
+          for (const tc of toolCalls) {
+            let args: Record<string, unknown> = {};
+            try { args = JSON.parse(tc.function.arguments || '{}'); } catch { /* ignore */ }
+            send({ type: 'status', text: `正在调用 ${tc.function.name}…` });
+            let out = runTool(tc.function.name, args);
+            if (out.result === 'ASYNC') {
+              out = await generateQuestions(String(args.topic ?? ''), Number(args.count) || 5, args.save === true, providerId);
+            }
+            trace.push({ name: tc.function.name, args: tc.function.arguments, summary: out.summary });
+            send({ type: 'trace', trace: { name: tc.function.name, summary: out.summary } });
+            convo.push({ role: 'tool', content: out.result.slice(0, 4000), tool_call_id: tc.id });
+          }
+        }
+        // 工具轮次耗尽，强制收尾
+        for await (const ev of chatStreamEvents(convo, {
+          purpose: 'kun', maxTokens: 1600, providerId, signal: req.signal,
+        })) {
+          if (ev.type === 'delta') {
+            full += ev.text;
+            send({ type: 'delta', text: ev.text });
+          }
+        }
+        send({ type: 'done', content: full, trace, provider: providerId ?? 'default' });
+      } catch (e) {
+        if (!req.signal.aborted) {
+          send({ type: 'error', error: e instanceof Error ? e.message : String(e) });
+        }
+      } finally {
+        clearInterval(heartbeat);
+        closed = true;
+        try { controller.close(); } catch { /* already closed */ }
       }
-    }
-    // 工具轮次耗尽，强制收尾
-    const { content } = await chat(convo, { purpose: 'kun', maxTokens: 1600, providerId });
-    return NextResponse.json({ content, trace, provider: providerId ?? 'default' });
-  } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 502 });
-  }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 }
