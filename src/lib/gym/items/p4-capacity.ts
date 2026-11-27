@@ -42,6 +42,10 @@ export const capacity: GymItem = {
     label: '容量三连',
     code: 'replicas = (gpu_mem_gb - reserved_gb) // model_mem_gb\nqps_per_gpu = replicas * batch_size * 1000 / latency_ms\ngpus_needed = ceil(target_qps / qps_per_gpu)',
   },
+  quickCode: `usable = gpu_mem_gb - reserved_gb
+replicas = int(usable // model_mem_gb)
+qps_per_gpu = round(replicas * batch_size * 1000 / latency_ms, 3)
+gpus_needed = math.ceil(target_qps / qps_per_gpu) if qps_per_gpu > 0 else 0`,
   skeleton: `import math
 
 def gpu_plan(model_mem_gb, gpu_mem_gb, reserved_gb, latency_ms, batch_size, target_qps):

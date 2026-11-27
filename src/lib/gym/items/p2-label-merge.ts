@@ -40,6 +40,10 @@ export const labelMerge: GymItem = {
     label: '加权计数与唯一最大',
     code: 'top = max(counts.values())\nwinners = [label for label, score in counts.items() if score == top]\nresult = winners[0] if len(winners) == 1 else "ARBITRATE"',
   },
+  quickCode: `counts[label] = counts.get(label, 0) + weights[annotator]
+top = max(counts.values())
+winners = [label for label, score in counts.items() if score == top]
+result = winners[0] if len(winners) == 1 else "ARBITRATE"`,
   skeleton: `def merge_labels(votes, weights):
     tally, seen = {}, []
     for sample, annotator, label in votes:

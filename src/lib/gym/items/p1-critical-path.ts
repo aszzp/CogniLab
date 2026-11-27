@@ -92,6 +92,10 @@ export const criticalPath: GymItem = {
     code: `正推：ES[v] = max(EF[前置], 默认 0)，EF[v] = ES[v] + 耗时[v]
 倒推：LF[v] = min(LS[后继], 默认 工期)，LS[v] = LF[v] - 耗时[v]`,
   },
+  quickCode: `for v in reversed(topo):
+    tail[v] = durations[v] + max((tail[w] for w in succ[v]), default=0)
+makespan = max(tail)
+cur = min(v for v in sources if tail[v] == makespan)`,
   skeleton: `def pipeline_critical_path(names, durations, deps):
     """返回 [工期, 关键路径环节名列表, 瓶颈环节名]。"""
     n = len(names)

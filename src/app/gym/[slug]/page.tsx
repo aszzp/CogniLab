@@ -16,7 +16,7 @@ export default async function GymItemPage({
   const item = findGymItem(slug);
   if (!item) notFound();
   const { tab } = await searchParams;
-  const initialTab = tab === 'practice' ? 'practice' : tab === 'visual' ? 'visual' : tab === 'sprint' ? 'sprint' : 'learn';
+  const initialTab = tab === 'practice' || tab === 'visual' || tab === 'sprint' || tab === 'quick' ? tab : 'learn';
   const progress = gymProgress(item.key) ?? null;
   const version = await pythonVersion();
   return (

@@ -2,17 +2,19 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Code2, Eye, Play, Timer, Trophy, Zap } from 'lucide-react';
+import { ArrowLeft, BookOpen, Code2, Eye, Keyboard, Play, Timer, Trophy, Zap } from 'lucide-react';
 import type { GymCode, GymItem, GymProgress } from '@/lib/gym/types';
 import VisualPlayer from './VisualPlayer';
 import GymDrillSession, { type DrillEntry } from './GymDrillSession';
 import CodeSprint from './CodeSprint';
+import QuickWrite from './QuickWrite';
 
-type Tab = 'learn' | 'visual' | 'practice' | 'sprint';
+type Tab = 'learn' | 'visual' | 'quick' | 'practice' | 'sprint';
 
 const TAB_META: { key: Tab; label: string; icon: typeof BookOpen }[] = [
   { key: 'learn', label: '学习', icon: BookOpen },
   { key: 'visual', label: '可视化', icon: Eye },
+  { key: 'quick', label: '速写', icon: Keyboard },
   { key: 'practice', label: '练习', icon: Code2 },
   { key: 'sprint', label: '冲刺', icon: Zap },
 ];
@@ -30,8 +32,11 @@ export default function GymItemView({
     [item],
   );
   const hasCode = codeDrills.length > 0;
-  const tabs = hasCode ? TAB_META : TAB_META.filter((t) => t.key !== 'sprint');
-  const [tab, setTab] = useState<Tab>(initialTab === 'sprint' && !hasCode ? 'learn' : initialTab);
+  const hasQuick = Boolean(item.quickCode || item.formula?.code || item.skeleton);
+  const tabs = TAB_META.filter((t) => (t.key !== 'sprint' || hasCode) && (t.key !== 'quick' || hasQuick));
+  const [tab, setTab] = useState<Tab>(
+    (initialTab === 'sprint' && !hasCode) || (initialTab === 'quick' && !hasQuick) ? 'learn' : initialTab,
+  );
   const [sprintId, setSprintId] = useState(() => codeDrills[0]?.id ?? '');
   const sprintDrill = codeDrills.find((d) => d.id === sprintId) ?? codeDrills[0];
   const [local, setLocal] = useState<GymProgress | null>(progress);
@@ -41,6 +46,7 @@ export default function GymItemView({
     })),
     [item],
   );
+  const tabCols = tabs.length === 5 ? 'grid-cols-5' : tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-3';
 
   return (
     <div className="fade-up space-y-3">
@@ -73,7 +79,7 @@ export default function GymItemView({
         </div>
       </header>
 
-      <div className={`grid ${tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-3'} gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs`}>
+      <div className={`grid ${tabCols} gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs`}>
         {tabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -93,6 +99,7 @@ export default function GymItemView({
         <LearnTab
           item={item}
           onVisual={() => setTab('visual')}
+          onQuick={hasQuick ? () => setTab('quick') : undefined}
           onPractice={() => setTab('practice')}
           onSprint={hasCode ? () => setTab('sprint') : undefined}
         />
@@ -112,6 +119,7 @@ export default function GymItemView({
           </div>
         </div>
       )}
+      {tab === 'quick' && <QuickWrite item={item} />}
       {tab === 'practice' && (
         <div className="space-y-3">
           {hasCode && (
@@ -180,10 +188,11 @@ function Mastery({ value }: { value: number }) {
 }
 
 function LearnTab({
-  item, onVisual, onPractice, onSprint,
+  item, onVisual, onQuick, onPractice, onSprint,
 }: {
   item: GymItem;
   onVisual: () => void;
+  onQuick?: () => void;
   onPractice: () => void;
   onSprint?: () => void;
 }) {
@@ -250,6 +259,11 @@ function LearnTab({
           <Play size={14} /> 开始练习
         </button>
       </div>
+      {onQuick && (
+        <button type="button" onClick={onQuick} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-violet-400/25 bg-violet-400/[0.05] py-2.5 text-[12px] font-semibold text-violet-200 hover:bg-violet-400/[0.1]">
+          <Keyboard size={14} /> 代码速写 · Enter 检查
+        </button>
+      )}
       {onSprint && (
         <button type="button" onClick={onSprint} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.05] py-2.5 text-[12px] font-semibold text-cyan-200 hover:bg-cyan-400/[0.1]">
           <Zap size={14} /> 代码冲刺 · 从零写 5 轮

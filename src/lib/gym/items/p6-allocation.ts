@@ -42,6 +42,10 @@ export const allocation: GymItem = {
     label: '最大余数法',
     code: 'quota = min(min_each, size)\nbase = remaining * capacity // pool\nleft = remaining - sum(base)\n按 (-remainder, index) 补 left 个',
   },
+  quickCode: `base = [remaining * c // pool for c in capacity]
+remainder = [remaining * c % pool for c in capacity]
+for i in sorted(range(len(strata)), key=lambda i: (-remainder[i], i))[:left]:
+    quota[i] += 1`,
   skeleton: `def allocate_quotas(strata, total, min_each):
     quota = [min(min_each, size) for _, size in strata]
     capacity = [size - q for (_, size), q in zip(strata, quota)]

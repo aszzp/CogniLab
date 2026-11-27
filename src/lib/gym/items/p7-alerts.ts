@@ -40,8 +40,15 @@ export const alerts: GymItem = {
   ],
   formula: {
     label: '聚合与抑制',
-    code: '聚合：ts - prev <= window  → 并入当前事件\n抑制：ts - last_sent < gap  → 抑制（不刷新 last_sent）',
+    code: '聚合：ts - prev <= window  → 并入当前事件\n抑制：ts - last_sent < gap  →  抑制（不刷新 last_sent）',
   },
+  quickCode: `if ts - prev <= window_sec:
+    count += 1
+    top = min(top, severity)
+else:
+    incidents.append([service, metric, start, prev, count, top])
+    start, count, top = ts, 1, severity
+prev = ts`,
   skeleton: `def aggregate_alerts(alerts, window_sec):
     by_key = {}
     for ts, service, metric, severity in alerts:

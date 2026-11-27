@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowRight, Brain, CheckCircle2, ChevronRight, Code2, Dumbbell, Flame, Play, Timer, Zap,
+  ArrowRight, Brain, CheckCircle2, ChevronRight, Code2, Dumbbell, Flame, Keyboard, Play, Timer, Zap,
 } from 'lucide-react';
 import type { GymListItem } from '@/lib/gym/content';
 import type { GymProgress } from '@/lib/gym/types';
@@ -75,7 +75,7 @@ export default function GymList({
         <div className="min-w-0">
           <h1 className="text-lg font-bold">实操道场</h1>
           <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
-            7 个业务模板 + 10 个函数惯用法。先看懂一张卡，再用可视化走一遍、代码冲刺和 AI 点评练到条件反射。
+            7 个业务模板 + 10 个函数惯用法。先看懂一张卡，再用可视化走一遍、逐行速写、代码冲刺和 AI 点评练到条件反射。
           </p>
         </div>
       </div>
@@ -213,6 +213,12 @@ function ItemRow({ item, progress, now }: { item: GymListItem; progress?: GymPro
             <Zap size={10} /> 冲刺
           </Link>
         )}
+        <Link
+          href={`/gym/${item.key}?tab=quick`}
+          className="flex items-center gap-1 rounded-full border border-violet-400/20 bg-violet-400/[0.05] px-2.5 py-1.5 text-[10.5px] text-violet-200 transition-colors hover:border-violet-400/40"
+        >
+          <Keyboard size={10} /> 速写
+        </Link>
         <Link
           href={`/gym/${item.key}?tab=practice`}
           className="flex items-center gap-1 rounded-full border border-white/12 px-2.5 py-1.5 text-[10.5px] text-zinc-400 transition-colors hover:border-violet-400/40 hover:text-violet-200"

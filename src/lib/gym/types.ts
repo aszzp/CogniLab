@@ -92,6 +92,8 @@ export interface GymItem {
   summary: string;
   sections: GymSection[];
   formula?: GymFormula;
+  /** 「速写」默认练习的核心代码；留空时回退到 formula.code。 */
+  quickCode?: string;
   skeleton?: string;
   traps?: GymTrap[];
   /** 可视化组件键；在 VisualPlayer 里映射到具体实现。 */

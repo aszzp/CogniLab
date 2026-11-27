@@ -41,6 +41,11 @@ export const threshold: GymItem = {
     label: '可行阈值',
     code: 'auto / n >= min_auto_rate  and  correct / auto >= min_precision\nthreshold = min(feasible)',
   },
+  quickCode: `pairs = sorted(zip(scores, labels), key=lambda p: -p[0])
+if i + 1 < n and pairs[i + 1][0] == score:
+    continue
+if auto / n >= min_auto_rate and correct / auto >= min_precision:
+    feasible.append(score)`,
   skeleton: `def route_threshold(scores, labels, min_auto_rate, min_precision):
     n = len(scores)
     pairs = sorted(zip(scores, labels), key=lambda p: -p[0])

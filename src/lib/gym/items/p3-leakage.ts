@@ -42,6 +42,9 @@ export const leakage: GymItem = {
     label: '泄漏判定',
     code: 'train_groups & test_groups ≠ ∅  →  存在分组泄漏\nleak_rate = round(len(leaked) / len(test_ids), 4) if test_ids else 0.0',
   },
+  quickCode: `train_groups = {groups[i] for i in train_ids if i in groups}
+leaked = sorted(i for i in test_ids if i in groups and groups[i] in train_groups)
+rate = round(len(leaked) / len(test_ids), 4) if test_ids else 0.0`,
   skeleton: `def group_leakage(train_ids, test_ids, groups):
     train_groups = {groups[i] for i in train_ids if i in groups}
     leaked = sorted(i for i in test_ids if i in groups and groups[i] in train_groups)

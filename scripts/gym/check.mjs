@@ -54,6 +54,7 @@ try {
     if (!item.title || !item.subtitle || !item.summary) bad(`${item.key} 缺少标题/副标题/摘要`);
     if (!item.sections?.length) bad(`${item.key} 没有讲解段落`);
     if (!VISUALS.has(item.visual)) bad(`${item.key} 可视化 key 未注册：${item.visual}`);
+    if (!(item.quickCode ?? item.formula?.code)?.trim()) bad(`${item.key} 缺少速写代码`);
     if (!item.drills?.length) bad(`${item.key} 没有练习`);
 
     const counts = { mcq: 0, fill: 0, code: 0 };
